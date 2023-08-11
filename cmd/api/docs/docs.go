@@ -34,9 +34,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/coupons": {
+            "post": {
+                "description": "List all coupons",
+                "tags": [
+                    "Coupon"
+                ],
+                "summary": "List all coupons",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of users to fetch per page",
+                        "name": "count",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page_number",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of coupons",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid inputs",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "internal serever error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/login": {
             "post": {
                 "description": "Login to Admin account",
+                "consumes": [
+                    "application/json"
+                ],
                 "tags": [
                     "Admin"
                 ],
@@ -44,20 +90,13 @@ const docTemplate = `{
                 "operationId": "AdminLogin",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "format": "int32",
-                        "description": "count",
-                        "name": "count",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "format": "int32",
-                        "description": "page_number",
-                        "name": "page_number",
-                        "in": "query",
-                        "required": true
+                        "description": "inputs",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.LoginData"
+                        }
                     }
                 ],
                 "responses": {
@@ -120,50 +159,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/users": {
-            "get": {
-                "description": "List all the users in admin side",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Admin"
-                ],
-                "summary": "Admin ListUsers",
-                "operationId": "ListUsers",
-                "parameters": [
-                    {
-                        "description": "inputs",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.Users"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "List user successful",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Missing or Invalid inputs",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to get all users",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/admin/users/block": {
             "patch": {
                 "description": "Block users in admin side",
@@ -195,6 +190,94 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Failed to change user block_status",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "description": "Login to user account",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "User login",
+                "operationId": "User login",
+                "parameters": [
+                    {
+                        "description": "inputs",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.LoginData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OTP send to your mobile number!",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Failed to login",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Generate JWT failure",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/login/otp-verify": {
+            "post": {
+                "description": "OTP Verification to user account",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "User OTP Verification",
+                "operationId": "User OTP Verification",
+                "parameters": [
+                    {
+                        "description": "inputs",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.OTPVerify"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully logged in",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Missing or Invalid entry",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to login",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -241,12 +324,90 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/signup": {
+            "post": {
+                "description": "Create new user account",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "User Signup",
+                "operationId": "User Signup",
+                "parameters": [
+                    {
+                        "description": "inputs",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.SignupUserData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully logged in",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Missing or Invalid entry",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "description": "Get a paginated list of users.",
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get a list of users",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of users to fetch per page",
+                        "name": "count",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page_number",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List user successful",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Missing or invalid inputs",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get all users",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "domain.Users": {
-            "type": "object"
-        },
         "request.AddressPatchReq": {
             "type": "object",
             "properties": {
@@ -290,11 +451,69 @@ const docTemplate = `{
                 }
             }
         },
+        "request.CreateCoupon": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "discount_max_amount": {
+                    "type": "number"
+                },
+                "discount_percent": {
+                    "type": "number"
+                },
+                "min_order_value": {
+                    "type": "number"
+                },
+                "valid_till": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.LoginData": {
+            "type": "object",
+            "required": [
+                "Password"
+            ],
+            "properties": {
+                "Password": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 3
+                },
+                "email": {
+                    "description": "Phone    string ` + "`" + `json:\"phone\" binding:\"omitempty,min=10,max=10\"` + "`" + `",
+                    "type": "string"
+                },
+                "user_name": {
+                    "type": "string",
+                    "maxLength": 15,
+                    "minLength": 3
+                }
+            }
+        },
+        "request.OTPVerify": {
+            "type": "object",
+            "required": [
+                "otp",
+                "user_id"
+            ],
+            "properties": {
+                "otp": {
+                    "type": "string",
+                    "maxLength": 8,
+                    "minLength": 4
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "request.SignupUserData": {
             "type": "object",
             "required": [
                 "age",
-                "confirm_password",
                 "email",
                 "first_name",
                 "last_name",
@@ -305,9 +524,6 @@ const docTemplate = `{
             "properties": {
                 "age": {
                     "type": "integer"
-                },
-                "confirm_password": {
-                    "type": "string"
                 },
                 "email": {
                     "type": "string"

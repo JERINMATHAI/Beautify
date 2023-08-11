@@ -17,7 +17,7 @@ func NewServerHTTP(adminHandler *handler.AdminHandler, userHandler *handler.User
 	engine := gin.New()
 
 	engine.Use(gin.Logger())
-	engine.LoadHTMLGlob("/home/ubuntu/go/beautify/views/*.html")
+	engine.LoadHTMLGlob("views/*.html")
 
 	// Get swagger docs
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

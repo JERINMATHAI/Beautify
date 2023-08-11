@@ -49,6 +49,8 @@ func ConnectDatabase(cfg config.Config) (*gorm.DB, error) {
 		domain.OrderReturn{},
 		// Coupon
 		domain.Coupon{},
+		//Wallet
+		domain.Wallet{},
 	)
 	if err != nil {
 		log.Fatal("DB Migration failed")

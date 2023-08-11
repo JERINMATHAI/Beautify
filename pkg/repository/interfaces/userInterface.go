@@ -8,7 +8,7 @@ import (
 )
 
 type UserRepository interface {
-	SaveUser(c context.Context, user domain.Users) error
+	SaveUser(c context.Context, user domain.Users) (response.UserSignUp, error)
 	FindUser(c context.Context, user domain.Users) (domain.Users, error)
 	GetUserbyID(ctx context.Context, userId uint) (domain.Users, error)
 

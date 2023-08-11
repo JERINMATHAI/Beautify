@@ -33,24 +33,26 @@ func AdminRoutes(api *gin.RouterGroup, adminHandler *handler.AdminHandler, produ
 
 		brand := api.Group("/brands")
 		{
-			brand.GET("/", productHandler.GetAllBrands)
-			brand.POST("/", productHandler.AddCategory)
+			brand.GET("/get", productHandler.GetAllBrands)
+			brand.POST("/add", productHandler.AddCategory)
 		}
 
 		product := api.Group("/products")
 		{
-			product.GET("/", productHandler.ListProducts)
-			product.POST("/", productHandler.AddProduct)
-			product.PUT("/", productHandler.UpdateProduct)
-			product.DELETE("/", productHandler.DeleteProduct)
+			product.GET("/list", productHandler.ListProducts)
+			product.POST("/add", productHandler.AddProduct)
+			product.PUT("/update", productHandler.UpdateProduct)
+			product.DELETE("/delete", productHandler.DeleteProduct)
+			product.POST("/addimage", productHandler.AddImage)
+
 			product.POST("/product-item", productHandler.AddProductItem)
 			product.GET("/product-item/:product_id", productHandler.GetProductItem)
 		}
 
 		coupons := api.Group("/coupons")
 		{
-			coupons.GET("/", couponHandler.ListAllCoupons)
-			coupons.POST("/", couponHandler.CreateNewCoupon)
+			coupons.GET("/list", couponHandler.ListAllCoupons)
+			coupons.POST("/create", couponHandler.CreateNewCoupon)
 		}
 		paymentmethod := api.Group("/paymentmethod")
 		{

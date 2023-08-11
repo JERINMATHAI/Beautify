@@ -6,9 +6,14 @@ import (
 	"beautify/pkg/domain"
 )
 
+type UserSignUp struct {
+	ID       uint   `json:"id"`
+	UserName string `json:"user_name" copier:"must"`
+}
+
 type Profile struct {
 	ID             uint    `json:"id"`
-	UserName       string  `json:"user_name" copire:"must"`
+	UserName       string  `json:"user_name" copier:"must"`
 	FirstName      string  `json:"first_name" copier:"must"`
 	LastName       string  `json:"last_name" copier:"must"`
 	Age            uint    `json:"age" copier:"must"`
@@ -38,14 +43,14 @@ type ResUserHome struct {
 
 // cart item reponse
 type CartItemResp struct {
-	CartID        uint   `json:"cart_id"`
-	Name          string `json:"product_name"`
-	Price         uint   `json:"price"`
-	DiscountPrice uint   `json:"discount_price"`
-	Quantity      uint   `json:"quantity"`
-	QtyLeft       uint   `json:"quantity_left"`
-	StockStatus   bool   `json:"stock_status"`
-	SubTotal      uint   `json:"sub_total"`
+	CartID   uint   `json:"cart_id"`
+	Name     string `json:"product_name"`
+	Price    uint   `json:"price"`
+	Quantity uint   `json:"quantity"`
+	SubTotal uint   `json:"sub_total"`
+	//StockStatus bool   `json:"stock_status"`
+	//DiscountPrice uint   `json:"discount_price"`
+	//QtyLeft     uint `json:"quantity_left"`
 }
 
 type CartResp struct {

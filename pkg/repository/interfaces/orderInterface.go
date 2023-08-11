@@ -32,4 +32,6 @@ type OrderRepository interface {
 	SalesReport(c context.Context, page request.ReqPagination, salesData request.ReqSalesReport) ([]response.SalesReport, error)
 	ReturnRequest(c context.Context, returnOrder domain.OrderReturn) (response.ReturnResponse, error)
 	VerifyOrderID(c context.Context, id uint, orderid uint) error
+
+	InsertIntoWallet(userID int, amount float32) (response.Wallet, error)
 }

@@ -1,6 +1,4 @@
 definitions:
-  domain.Users:
-    type: object
   request.AddressPatchReq:
     properties:
       address_id:
@@ -29,12 +27,51 @@ definitions:
     required:
     - user_id
     type: object
+  request.CreateCoupon:
+    properties:
+      code:
+        type: string
+      discount_max_amount:
+        type: number
+      discount_percent:
+        type: number
+      min_order_value:
+        type: number
+      valid_till:
+        type: string
+    type: object
+  request.LoginData:
+    properties:
+      Password:
+        maxLength: 30
+        minLength: 3
+        type: string
+      email:
+        description: Phone    string `json:"phone" binding:"omitempty,min=10,max=10"`
+        type: string
+      user_name:
+        maxLength: 15
+        minLength: 3
+        type: string
+    required:
+    - Password
+    type: object
+  request.OTPVerify:
+    properties:
+      otp:
+        maxLength: 8
+        minLength: 4
+        type: string
+      user_id:
+        type: integer
+    required:
+    - otp
+    - user_id
+    type: object
   request.SignupUserData:
     properties:
       age:
         type: integer
-      confirm_password:
-        type: string
       email:
         type: string
       first_name:
@@ -57,7 +94,6 @@ definitions:
         type: string
     required:
     - age
-    - confirm_password
     - email
     - first_name
     - last_name
@@ -89,23 +125,47 @@ paths:
       summary: Admin Home
       tags:
       - Admin
+  /admin/coupons:
+    post:
+      description: List all coupons
+      parameters:
+      - description: Number of users to fetch per page
+        in: query
+        name: count
+        type: integer
+      - description: Page number
+        in: query
+        name: page_number
+        type: integer
+      responses:
+        "200":
+          description: List of coupons
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: invalid inputs
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: internal serever error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: List all coupons
+      tags:
+      - Coupon
   /admin/login:
     post:
+      consumes:
+      - application/json
       description: Login to Admin account
       operationId: AdminLogin
       parameters:
-      - description: count
-        format: int32
-        in: query
-        name: count
+      - description: inputs
+        in: body
+        name: input
         required: true
-        type: integer
-      - description: page_number
-        format: int32
-        in: query
-        name: page_number
-        required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/request.LoginData'
       responses:
         "200":
           description: Successfully logged in
@@ -147,35 +207,6 @@ paths:
       summary: Admin SignUp
       tags:
       - Admin
-  /admin/users:
-    get:
-      consumes:
-      - application/json
-      description: List all the users in admin side
-      operationId: ListUsers
-      parameters:
-      - description: inputs
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/domain.Users'
-      responses:
-        "200":
-          description: List user successful
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: Missing or Invalid inputs
-          schema:
-            $ref: '#/definitions/response.Response'
-        "500":
-          description: Failed to get all users
-          schema:
-            $ref: '#/definitions/response.Response'
-      summary: Admin ListUsers
-      tags:
-      - Admin
   /admin/users/block:
     patch:
       consumes:
@@ -201,6 +232,64 @@ paths:
       summary: Admin Block Users
       tags:
       - Admin
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Login to user account
+      operationId: User login
+      parameters:
+      - description: inputs
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/request.LoginData'
+      responses:
+        "200":
+          description: OTP send to your mobile number!
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Failed to login
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Generate JWT failure
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: User login
+      tags:
+      - User
+  /login/otp-verify:
+    post:
+      consumes:
+      - application/json
+      description: OTP Verification to user account
+      operationId: User OTP Verification
+      parameters:
+      - description: inputs
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/request.OTPVerify'
+      responses:
+        "200":
+          description: Successfully logged in
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Missing or Invalid entry
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Failed to login
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: User OTP Verification
+      tags:
+      - User
   /profile/address:
     put:
       description: user can update a address
@@ -226,4 +315,57 @@ paths:
       summary: api for update user address
       tags:
       - Update Order
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Create new user account
+      operationId: User Signup
+      parameters:
+      - description: inputs
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/request.SignupUserData'
+      responses:
+        "200":
+          description: Successfully logged in
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Missing or Invalid entry
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: User Signup
+      tags:
+      - User
+  /users:
+    get:
+      description: Get a paginated list of users.
+      parameters:
+      - description: Number of users to fetch per page
+        in: query
+        name: count
+        type: integer
+      - description: Page number
+        in: query
+        name: page_number
+        type: integer
+      responses:
+        "200":
+          description: List user successful
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Missing or invalid inputs
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Failed to get all users
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get a list of users
+      tags:
+      - Users
 swagger: "2.0"

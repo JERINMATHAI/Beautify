@@ -51,10 +51,12 @@ func (p *productDatabase) AddCategory(ctx context.Context, brand request.Categor
 // Get all brands from database
 func (p *productDatabase) GetAllBrand(ctx context.Context) (brand []response.Brand, err error) {
 
-	query := `SELECT c.id, c.category_name FROM categories c OFFSET 1`
+	query := `SELECT c.id, c.category_name FROM categories as c`
 	if p.DB.Raw(query).Scan(&brand).Error != nil {
 		return brand, fmt.Errorf("failed to get brands data from db")
 	}
+	fmt.Println(brand)
+
 	return brand, nil
 }
 
@@ -62,13 +64,26 @@ func (p *productDatabase) GetAllBrand(ctx context.Context) (brand []response.Bra
 
 // Add product
 func (p *productDatabase) SaveProduct(ctx context.Context, product domain.Product) error {
-	query := `INSERT INTO products (name, description, category_id, price, image, created_at) VALUES ($1, $2, $3, $4, $5, $6)`
+	query := `INSERT INTO products (name, description, category_id, price, created_at) VALUES ($1, $2, $3, $4, $5)`
 
 	createdAt := time.Now()
-	if p.DB.Exec(query, product.Name, product.Description, product.CategoryID, product.Price, product.Image, createdAt).Error != nil {
+	if p.DB.Exec(query, product.Name, product.Description, product.CategoryID, product.Price, createdAt).Error != nil {
 		return errors.New("failed to save product on database")
 	}
 	return nil
+}
+
+//Add Image
+func (pd *productDatabase) AddImage(c context.Context, pid int, filename string) (domain.ProductImage, error) {
+
+	// Store the image record in the database
+	image := domain.ProductImage{ProductId: uint(pid), Image: filename}
+	if err := pd.DB.Create(&image).Error; err != nil {
+
+		return domain.ProductImage{}, errors.New("failed to store image record")
+	}
+
+	return image, nil
 }
 
 // Get product
@@ -106,9 +121,9 @@ func (p *productDatabase) GetAllProducts(ctx context.Context, page request.ReqPa
 	offset := (page.PageNumber - 1) * limit
 
 	query := `SELECT p.id, p.name, p.description, c.category_name, p.price, p.discount_price,
-	 p.image,  p.created_at, p.updated_at  
-	FROM products p LEFT JOIN categories c ON p.category_id = c.id 
-	ORDER BY created_at DESC LIMIT $1 OFFSET $2`
+	p.created_at, p.updated_at, pi.image
+	FROM products p LEFT JOIN categories c ON p.category_id = c.id LEFT JOIN product_images pi
+	ON pi.product_id=p.id ORDER BY created_at DESC LIMIT $1 OFFSET $2`
 
 	if p.DB.Raw(query, limit, offset).Scan(&products).Error != nil {
 		return products, errors.New("failed to get products from database")
@@ -132,9 +147,9 @@ func (p *productDatabase) UpdateProduct(ctx context.Context, product domain.Prod
 	if product.Price == 0 {
 		product.Price = existingProduct.Price
 	}
-	if product.Image == "" {
-		product.Image = existingProduct.Image
-	}
+	// if product.Image == "" {
+	// 	product.Image = existingProduct.Image
+	// }
 	if product.CategoryID == 0 {
 		product.CategoryID = existingProduct.CategoryID
 	}
@@ -144,7 +159,7 @@ func (p *productDatabase) UpdateProduct(ctx context.Context, product domain.Prod
 	updatedAt := time.Now()
 
 	if p.DB.Exec(query, product.Name, product.Description, product.CategoryID,
-		product.Price, product.Image, updatedAt, product.ID).Error != nil {
+		product.Price, updatedAt, product.ID).Error != nil {
 		return errors.New("failed to update product")
 	}
 

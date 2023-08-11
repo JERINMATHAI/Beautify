@@ -23,7 +23,7 @@ type Product struct {
 	Category      *Category `json:"-" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Price         uint      `json:"price" gorm:"not null"`
 	DiscountPrice uint      `json:"discount_price" gorm:"default:null"`
-	Image         string    `json:"image" gorm:"not null"`
+	//Image         string    `json:"image" gorm:"not null"`
 	// CreatedAt     time.Time      `json:"created_at" gorm:"not null"`
 	// UpdatedAt     time.Time      `json:"updated_at" gorm:"default:null"`
 	// Items         []*ProductItem `json:"-" gorm:"foreignKey:ProductID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
@@ -39,15 +39,16 @@ type ProductItem struct {
 	Price         uint   `json:"price" gorm:"not null"`
 	SKU           string `json:"sku" gorm:"unique;not null"`
 	DiscountPrice uint   `json:"discount_price" gorm:"default:null"`
-	// CreatedAt     time.Time `json:"created_at" gorm:"not null"`
-	// UpdatedAt     time.Time `json:"updated_at" gorm:"default:null"`
-	// //Configurations []*ProductConfig `json:"product_config" gorm:"many2many:product_configurations;"`
-	//Images []*ProductImage `json:"-" gorm:"foreignKey:ProductItemID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
+// type ProductImage struct {
+// 	ID            uint        `json:"id" gorm:"primaryKey;not null;autoIncrement"`
+// 	ProductItemID uint        `json:"product_item_id" gorm:"not null"`
+// 	ProductItem   ProductItem `json:"-" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+// 	Image         string      `json:"image" gorm:"not null"`
+// }
 type ProductImage struct {
-	ID            uint        `json:"id" gorm:"primaryKey;not null;autoIncrement"`
-	ProductItemID uint        `json:"product_item_id" gorm:"not null"`
-	ProductItem   ProductItem `json:"-" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
-	Image         string      `json:"image" gorm:"not null"`
+	ID        uint   `json:"id" gorm:"primaryKey"`
+	ProductId uint   `json:"product_id"`
+	Image     string `JSON:"Image" `
 }

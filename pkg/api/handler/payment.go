@@ -21,6 +21,16 @@ func NewPaymentHandler(payUseCase service.PaymentService) *PaymentHandler {
 		PaymentService: payUseCase,
 	}
 }
+
+// AddPaymentMethod godoc
+// @Summary Add payment method
+// @Description Add payment method
+// @Tags Payment
+//	@Param			input	body	domain.PaymentMethod	true	"inputs"
+// @Failure 400 {object} response.Response{} "Error while fetching data from user"
+// @Failure 400 {object} response.Response{}"Can't add payment method"
+// @Success 200 {object} response.Response{} "Successfully added payment method"
+// @Router /admin/payment/add [post]
 func (p *PaymentHandler) AddpaymentMethod(c *gin.Context) {
 	var payment domain.PaymentMethod
 	if err := c.ShouldBindJSON(&payment); err != nil {
@@ -38,8 +48,17 @@ func (p *PaymentHandler) AddpaymentMethod(c *gin.Context) {
 	c.JSON(200, response)
 }
 
+// GetPaymentMethod godoc
+// @Summary Get payment method
+// @Description Get payment method
+// @Tags Payment
+// @Param			input	body	domain.PaymentMethod	true	"inputs"
+// @Failure 400 {object} response.Response{} "invalid inputs"
+// @Failure 400 {object} response.Response{}"invalid inputs"
+// @Failure 500 {object} response.Response{}" internal server error"
+// @Success 200 {object} response.Response{} "List of payment methods"
+// @Router /admin/payment/add [get]
 func (p *PaymentHandler) GetPaymentMethods(ctx *gin.Context) {
-
 	count, err1 := utils.StringToUint(ctx.Query("count"))
 	if err1 != nil {
 		response := response.ErrorResponse(400, "invalid inputs", err1.Error(), nil)
@@ -68,15 +87,22 @@ func (p *PaymentHandler) GetPaymentMethods(ctx *gin.Context) {
 	ctx.JSON(200, response)
 }
 
+// DeletePaymentMethod godoc
+// @Summary Delete payment method
+// @Description Delete payment method
+// @Tags Payment
+// @Param			input	body	domain.PaymentMethod	true	"inputs"
+// @Failure 400 {object} response.Response{} "Please add id as params"
+// @Failure 400 {object} response.Response{}"can't delete payment method"
+// @Success 200 {object} response.Response{} "successfully deleted method"
+// @Router /admin/payment/delete [delete]
 func (p *PaymentHandler) DeleteMethod(c *gin.Context) {
-
 	methodID, err := strconv.Atoi(c.Query("methodID"))
 	if err != nil {
 		response := response.ErrorResponse(400, "Please add id as params", err.Error(), methodID)
 		c.JSON(400, response)
 		return
 	}
-
 	err1 := p.PaymentService.DeleteMethod(c, uint(methodID))
 	if err1 != nil {
 		response := response.ErrorResponse(400, "can't delete payment method", err.Error(), "")
@@ -87,6 +113,15 @@ func (p *PaymentHandler) DeleteMethod(c *gin.Context) {
 	c.JSON(200, response)
 }
 
+// UpdatePaymentMethod godoc
+// @Summary Update payment method
+// @Description Update payment method
+// @Tags Payment
+// @Param			input	body	domain.PaymentMethod	true	"inputs"
+// @Failure 400 {object} response.Response{} "Error while getting data from admin side"
+// @Failure 400 {object} response.Response{}"Can't update data"
+// @Success 200 {object} response.Response{} "successfully updated method"
+// @Router /admin/payment/update [patch]
 func (p *PaymentHandler) UpdatePaymentMethod(c *gin.Context) {
 	var payment domain.PaymentMethod
 	if err := c.BindJSON(&payment); err != nil {

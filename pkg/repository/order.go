@@ -259,8 +259,8 @@ func (o *OrderDatabase) VerifyOrderID(c context.Context, id uint, orderid uint) 
 func (o *OrderDatabase) SalesReport(c context.Context, page request.ReqPagination, salesData request.ReqSalesReport) ([]response.SalesReport, error) {
 	var sales []response.SalesReport
 
-	limit := page.Count
-	offset := (page.PageNumber - 1) * limit
+	//limit := page.Count
+	//offset := (page.PageNumber - 1) * limit
 
 	db := o.DB.Model(&domain.Order{})
 
@@ -279,10 +279,10 @@ func (o *OrderDatabase) SalesReport(c context.Context, page request.ReqPaginatio
 			LEFT JOIN users AS u ON o.user_id = u.id
 			LEFT JOIN payment_methods AS p ON o.payment_method_id = p.id
 		WHERE o.order_date >= ? AND o.order_date <= ?
-		LIMIT ? OFFSET ?
+		
 	`
 
-	rows, err := db.Raw(query, salesData.StartDate, salesData.EndDate, limit, offset).Rows()
+	rows, err := db.Raw(query, salesData.StartDate, salesData.EndDate).Rows()
 	if err != nil {
 		return []response.SalesReport{}, errors.New("query didn't work")
 	}
@@ -300,7 +300,6 @@ func (o *OrderDatabase) SalesReport(c context.Context, page request.ReqPaginatio
 			&sale.OrderTotalPrice,
 			&sale.OrderStatus,
 			&sale.DeliveryStatus,
-			&sale.PaymentType,
 			&sale.PaymentStatus,
 		)
 
@@ -309,6 +308,15 @@ func (o *OrderDatabase) SalesReport(c context.Context, page request.ReqPaginatio
 		}
 		sales = append(sales, sale)
 	}
+	//fmt.Println("sales report", sales)
 
 	return sales, nil
+}
+
+func (o *OrderDatabase) InsertIntoWallet(userID int, amount float32) (response.Wallet, error) {
+	var InsertedRecord response.Wallet
+
+	query := `INSERT INTO wallets (user_id,amount)VALUES($1,$2) RETURNING *;`
+	err := o.DB.Raw(query, userID, amount).Scan(&InsertedRecord).Error
+	return InsertedRecord, err
 }

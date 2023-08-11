@@ -25,6 +25,17 @@ func NewOrderHandler(orderUseCase service.OrderService) *OrderHandler {
 	}
 }
 
+// CreateOrder godoc
+// @Summary Create order
+// @Description Create order
+// @Tags Order
+//	@Param			input	body	request.Order	true	"inputs"
+// @Failure 400 {object} response.Response{}"Failed to get address id"
+// @Failure 400 {object} response.Response{}"Failed to get payment method id"
+// @Failure 400 {object} response.Response{}"Failed to get total amount"
+// @Failure 400 {object} reponse.Response{}"Failed to create order"
+// @Success 200 {object} response.Response{}"Successfully created order. Please complete payment"
+// @Router /order/createOrder [post]
 func (o *OrderHandler) CreateOrder(c *gin.Context) {
 	var order domain.Order
 	addressID, err := strconv.Atoi(c.Query("address_id"))
@@ -41,13 +52,6 @@ func (o *OrderHandler) CreateOrder(c *gin.Context) {
 	}
 
 	userId := utils.GetUserIdFromContext(c)
-	//var OrderDetails request.OrderRequest
-	// if err := c.ShouldBindJSON(&OrderDetails); err != nil {
-	// 	response := response.ErrorResponse(400, "error while getting data from orders", err.Error(), OrderDetails)
-	// 	c.JSON(400, response)
-	// 	return
-	// }
-
 	totalAmount, err := o.OrderService.GetTotalAmount(c, userId)
 	if err != nil {
 		response := response.ErrorResponse(400, "Failed to get total amount", err.Error(), order)
@@ -72,6 +76,15 @@ func (o *OrderHandler) CreateOrder(c *gin.Context) {
 	c.JSON(200, response)
 }
 
+// UpdateOrder godoc
+// @Summary Update order
+// @Description Update order
+// @Tags Order
+// @Param			input	body	request.Order	true	"inputs"
+// @Failure 400 {object} response.Response{}"error while getting data from users"
+// @Failure 400 {object} response.Response{}"error while updating data"
+// @Success 200 {object} response.Response{}"Successfully updated order"
+// @Router /order/updateOrder [patch]
 func (o *OrderHandler) UpdateOrder(c *gin.Context) {
 	var UpdateOrderDetails request.UpdateOrder
 	if err := c.ShouldBindJSON(&UpdateOrderDetails); err != nil {
@@ -90,6 +103,16 @@ func (o *OrderHandler) UpdateOrder(c *gin.Context) {
 	c.JSON(200, response)
 }
 
+// ListAllOrder godoc
+// @Summary List All order
+// @Description List All order
+// @Tags Order
+//	@Param			input	body	request.Order	true	"inputs"
+// @Failure 400 {object} response.Response{}"Missing or invalid inputs"
+// @Failure 400 {object} response.Response{}"Missing or invalid inputs"
+// @Failure 500 {object} response.Response{}"Something went wrong!""
+// @Success 200 {object} response.Response{}"Get Orders successfully"
+// @Router /order/listOrder [get]
 func (o *OrderHandler) ListAllOrders(c *gin.Context) {
 	var page request.ReqPagination
 	count, err0 := utils.StringToUint(c.Query("count"))
@@ -119,6 +142,16 @@ func (o *OrderHandler) ListAllOrders(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// GetAllOrder godoc
+// @Summary Get All order
+// @Description Get All order
+// @Tags Order
+//	@Param			input	body	request.Order	true	"inputs"
+// @Failure 400 {object} response.Response{}"Missing or invalid inputs"
+// @Failure 400 {object} response.Response{}"Missing or invalid inputs"
+// @Failure 500 {object} response.Response{}"Something went wrong!""
+// @Success 200 {object} response.Response{}"Get Orders successfully"
+// @Router /order/getOrder [get]
 func (o *OrderHandler) GetAllOrders(c *gin.Context) {
 	var page request.ReqPagination
 	count, err0 := utils.StringToUint(c.Query("count"))
@@ -133,7 +166,6 @@ func (o *OrderHandler) GetAllOrders(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
-
 	page.PageNumber = page_number
 	page.Count = count
 
@@ -155,7 +187,6 @@ func (o *OrderHandler) CancelOrder(c *gin.Context) {
 		c.JSON(400, response)
 		return
 	}
-
 	err1 := o.OrderService.DeleteOrder(c, uint(order_id))
 	if err1 != nil {
 		response := response.ErrorResponse(400, "can't delete order", err.Error(), "")
@@ -167,14 +198,16 @@ func (o *OrderHandler) CancelOrder(c *gin.Context) {
 }
 
 func (o *OrderHandler) PlaceOrder(c *gin.Context) {
+	var placeorder request.PlaceOrderRequest
 	var order domain.Order
 	order_id, _ := strconv.Atoi(c.Query("order_id"))
 	coupon_id, _ := strconv.Atoi(c.Query("coupon_id"))
+
+	placeorder.CouponId = coupon_id
+	placeorder.OrderId = order_id
 	order.Order_Id = uint(order_id)
 	order.Applied_Coupon_id = uint(coupon_id)
-
 	order.OrderDate = time.Now()
-
 	couponResp, err := o.OrderService.ValidateCoupon(c, order.Applied_Coupon_id)
 	if err != nil {
 		response := response.ErrorResponse(400, "Invalid coupon", err.Error(), "try with a valid coupon")
@@ -396,8 +429,8 @@ func (o *OrderHandler) SalesReport(c *gin.Context) {
 		pdf.Ln(10)
 		pdf.Cell(0, 10, fmt.Sprintf("Payment status: %v", sale.PaymentStatus))
 		pdf.Ln(10)
-		pdf.Cell(0, 10, fmt.Sprintf("Payment Type: %v", sale.PaymentType))
-		pdf.Ln(10)
+		// pdf.Cell(0, 10, fmt.Sprintf("Payment Type: %v", sale.PaymentType))
+		// pdf.Ln(10)
 
 		// Move to the next line
 		pdf.Ln(10)

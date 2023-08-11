@@ -8,6 +8,7 @@ import (
 	"beautify/pkg/utils/response"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
@@ -59,6 +60,7 @@ func (p *ProductHandler) GetAllBrands(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
+	fmt.Println(allBrands)
 	// Success response
 	response := response.SuccessResponse(200, "Successfuly listed all brands", allBrands)
 	c.JSON(200, response)
@@ -85,6 +87,39 @@ func (p *ProductHandler) AddProduct(c *gin.Context) {
 	response := response.SuccessResponse(http.StatusOK, "Product added successful", body)
 	c.JSON(http.StatusOK, response)
 
+}
+
+func (p *ProductHandler) AddImage(c *gin.Context) {
+
+	pid, err := strconv.Atoi(c.PostForm("product_id"))
+	if err != nil {
+		response := response.ErrorResponse(400, "Error while fetching product_id", err.Error(), pid)
+		c.JSON(400, response)
+		return
+	}
+
+	form, err := c.MultipartForm()
+
+	if err != nil {
+		response := response.ErrorResponse(400, "Error while fetching image file", err.Error(), form)
+		c.JSON(400, response)
+		return
+	}
+	files := form.File["image"]
+	if len(files) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No image files found"})
+		return
+	}
+
+	Images, err := p.ProductService.AddImage(c, pid, files)
+	if err != nil {
+		response := response.ErrorResponse(400, "Can't be add images", err.Error(), Images)
+		c.JSON(400, response)
+		return
+	}
+
+	response := response.SuccessResponse(200, "successfully added images", Images)
+	c.JSON(200, response)
 }
 
 // ListProducts-User

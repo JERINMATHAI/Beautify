@@ -20,6 +20,8 @@ require (
 
 require github.com/jung-kurt/gofpdf v1.16.2
 
+require github.com/google/uuid v1.3.0 // indirect
+
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect

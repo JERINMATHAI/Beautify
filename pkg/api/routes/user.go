@@ -35,19 +35,19 @@ func UserRoutes(api *gin.RouterGroup, userHandler *handler.UserHandler, productH
 
 		profile := api.Group("/profile")
 		{
-			profile.POST("/address", userHandler.AddAddress)
-			profile.PUT("/address", userHandler.UpdateAddress)
-			profile.DELETE("/address/:id", userHandler.DeleteAddress)
-			profile.GET("/address", userHandler.GetAllAddress)
+			profile.POST("/add-address", userHandler.AddAddress)
+			profile.PUT("/edit-address", userHandler.UpdateAddress)
+			profile.DELETE("/delete-address/:id", userHandler.DeleteAddress)
+			profile.GET("/get-address", userHandler.GetAllAddress)
 			profile.GET("/", userHandler.Profile)
 		}
 
 		cart := api.Group("/cart")
 		{
-			cart.POST("/", userHandler.AddToCart)
-			cart.GET("/", userHandler.GetcartItems)
-			cart.PUT("/", userHandler.UpdateCart)
-			cart.DELETE("/", userHandler.DeleteCartItem)
+			cart.POST("/add", userHandler.AddToCart)
+			cart.GET("/get", userHandler.GetcartItems)
+			cart.PUT("/update", userHandler.UpdateCart)
+			cart.DELETE("/delete", userHandler.DeleteCartItem)
 		}
 
 		wishlist := api.Group("/wishlist")
@@ -59,7 +59,7 @@ func UserRoutes(api *gin.RouterGroup, userHandler *handler.UserHandler, productH
 
 		coupon := api.Group("/coupons")
 		{
-			coupon.GET("/", couponHandler.ListAllCoupons)
+			coupon.GET("/list", couponHandler.ListAllCoupons)
 		}
 
 		order := api.Group("/order")
@@ -74,7 +74,7 @@ func UserRoutes(api *gin.RouterGroup, userHandler *handler.UserHandler, productH
 
 		Return := api.Group("/return")
 		{
-			Return.POST("/", orderHandler.ReturnOrder)
+			Return.POST("/product", orderHandler.ReturnOrder)
 		}
 	}
 

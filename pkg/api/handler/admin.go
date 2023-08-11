@@ -113,9 +113,9 @@ func (a *AdminHandler) LogoutAdmin(c *gin.Context) {
 // @Tags Users
 // @Param count query int false "Number of users to fetch per page"
 // @Param page_number query int false "Page number"
-// @Success 200 {object} SuccessResponse "List user successful"
-// @Failure 400 {object} ErrorResponse "Missing or invalid inputs"
-// @Failure 500 {object} ErrorResponse "Failed to get all users"
+//  @Success		200 {object}	response.Response{} "List user successful"
+// @Failure 400 {object} response.Response{} "Missing or invalid inputs"
+// @Failure 500 {object} response.Response{} "Failed to get all users"
 // @Router /users [get]
 func (a *AdminHandler) ListUsers(c *gin.Context) {
 
@@ -182,7 +182,6 @@ func (a *AdminHandler) BlockUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, response)
 		return
 	}
-
 	response := response.SuccessResponse(200, "Successfully changed user block_status", body.UserID)
 	ctx.JSON(http.StatusOK, response)
 }

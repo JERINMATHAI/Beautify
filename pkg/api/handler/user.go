@@ -33,7 +33,7 @@ func NewUserHandler(userUsecase interfaces.UserService) *UserHandler {
 //	@Accept			json
 //	@Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
 //	@Success		200	{object}	response.Response{}	"Successfully logged in"
-//	@Router			/login [post]
+//	@Router			/signup [post]
 func (u *UserHandler) UserSignup(c *gin.Context) {
 	var body request.SignupUserData
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -42,23 +42,31 @@ func (u *UserHandler) UserSignup(c *gin.Context) {
 		return
 	}
 	var user domain.Users
-	// var user domain.Users
 	if err := copier.Copy(&user, body); err != nil {
 		fmt.Println("Copy failed")
 	}
-	// Check the user already exist in DB and save user if not
-	if err := u.userService.SignUp(c, user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	usr, err := u.userService.SignUp(c, user)
+	if err != nil {
+		response := response.ErrorResponse(400, "User already exist", err.Error(), body)
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
-	// Success response
-	response := response.SuccessResponse(200, "Account created successfuly", nil)
+	response := response.SuccessResponse(200, "Account created successfuly", usr)
 	c.JSON(http.StatusOK, response)
 }
 
-//__________________________________________LOGIN__________________________________________
-
-// User Login
+//	User Login  godoc
+//	@Summary		User login
+//	@id				User login
+//	@Description	Login to user account
+//	@Tags			User
+//	@Param			input	body	request.LoginData	true	"inputs"
+//	@Accept			json
+//	@Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
+//  @Failure 		400 {object}	response.Response{} 	"Failed to login"
+//	@Failure		500	{object}	response.Response{}		"Generate JWT failure"
+//	@Success		200 {object}	response.Response{}		"OTP send to your mobile number!"
+//	@Router			/login [post]
 func (u *UserHandler) LoginSubmit(c *gin.Context) {
 	var body request.LoginData
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -67,16 +75,13 @@ func (u *UserHandler) LoginSubmit(c *gin.Context) {
 		return
 	}
 	if body.Email == "" && body.Password == "" && body.UserName == "" {
-		_ = errors.New("please enter user_name and password")
+		_ = errors.New("Please enter user_name and password")
 		response := "Field should not be empty"
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
-
-	// Copying
 	var user domain.Users
 	copier.Copy(&user, body)
-
 	// validate login data
 	user, err := u.userService.Login(c, user)
 	if err != nil {
@@ -84,21 +89,29 @@ func (u *UserHandler) LoginSubmit(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
-
 	// Setup JWT
 	if !auth.JwtCookieSetup(c, "user-auth", user.ID) {
 		response := response.ErrorResponse(500, "Generate JWT failure", err.Error(), nil)
 		c.JSON(http.StatusBadRequest, response)
 	}
 	// Success response
-	response := response.SuccessResponse(200, "OTP send to your mobile number!", nil)
+	response := response.SuccessResponse(200, "OTP send to your mobile number!", user.Phone)
 	c.JSON(http.StatusOK, response)
-
 }
 
-// OTP verification- LOGIN
+//	User OTP Verification  godoc
+//	@Summary		User OTP Verification
+//	@id				User OTP Verification
+//	@Description	OTP Verification to user account
+//	@Tags			User
+//	@Param			input	body	request.OTPVerify	true	"inputs"
+//	@Accept			json
+//	@Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
+//  @Failure 		500 {object}	response.Response{} 	"User not registered"
+//	@Failure		500	{object}	response.Response{}		"Failed to login"
+//	@Success		200 {object}	response.Response{}		"Successfully logged in"
+//	@Router			/login/otp-verify [post]
 func (u *UserHandler) UserOTPVerify(c *gin.Context) {
-
 	var body request.OTPVerify
 	if err := c.ShouldBindJSON(&body); err != nil {
 		response := response.ErrorResponse(400, "Missing or invalid entry", err.Error(), body)
@@ -108,16 +121,13 @@ func (u *UserHandler) UserOTPVerify(c *gin.Context) {
 	var user = domain.Users{
 		ID: body.UserID,
 	}
-
 	usr, err := u.userService.OTPLogin(c, user)
 	if err != nil {
 		response := response.ErrorResponse(500, "User not registered", err.Error(), user)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
-	fmt.Println(body.OTP)
-
-	// Verify otp
+	// Verify OTP
 	err = verify.TwilioVerifyOTP("+91"+usr.Phone, body.OTP)
 	if err != nil {
 		response := gin.H{"error": err.Error()}
@@ -136,30 +146,48 @@ func (u *UserHandler) UserOTPVerify(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// Home page
+//	User Home  godoc
+//	@Summary		User Home
+//	@id				User Home
+//	@Description	Home page for user
+//	@Tags			User
+//	@Accept			json
+//	@Success		200 {object}	response.Response{}		"Welcome to home !"
+//	@Router			/ [get]
 func (u *UserHandler) Home(c *gin.Context) {
-
 	response := response.SuccessResponse(200, "Welcome to home !", nil)
 	c.JSON(http.StatusOK, response)
 }
 
-// User logout
+//	User Logout  godoc
+//	@Summary		User Logout
+//	@id				User Logout
+//	@Description	Logout from user account
+//	@Tags			User
+//	@Accept			json
+//	@Success		200 {object}	response.Response{}		"Log out successful"
+//	@Router			/logout [get]
 func (u *UserHandler) LogoutUser(c *gin.Context) {
 	c.SetCookie("user-auth", "", -1, "", "", false, true)
 	response := response.SuccessResponse(http.StatusOK, "Log out successful", nil)
 	c.JSON(http.StatusOK, response)
 }
 
-//_____________________________________ADDRESS______________________________________
-
-//Add Address
+//	Add user addresss  godoc
+//	@Summary		Add user addresss
+//	@id				Add user addresss
+//	@Description	Add the addresss of user
+//	@Tags			User
+//	@Param			input	body	request.Address	true	"inputs"
+//	@Accept			json
+//	@Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
+//  @Failure 		500 {object}	response.Response{} 	"Something went wrong"
+//	@Success		200 {object}	response.Response{}		"Address saved successfully"
+//	@Router			/profile/add-address [post]
 func (u *UserHandler) AddAddress(c *gin.Context) {
 	var body request.Address
-	fmt.Println(c)
 	userId := utils.GetUserIdFromContext(c)
-
 	body.UserID = userId
-
 	if err := c.ShouldBindJSON(&body); err != nil {
 		response := response.ErrorResponse(400, "Missing or invalid entry", err.Error(), body)
 		c.JSON(400, response)
@@ -170,23 +198,23 @@ func (u *UserHandler) AddAddress(c *gin.Context) {
 		c.JSON(500, response)
 		return
 	}
-	response := response.SuccessResponse(200, "Save address successful", nil)
+	response := response.SuccessResponse(200, "Address saved successfully", body)
 	c.JSON(200, response)
 
 }
 
-// update address godoc
-//	@summary		api for update user address
-//	@description	user can update a address
-//	@security		ApiKeyAuth
-//	@id				DeleteAddress
-//	@tags			Update Order
-//	@Param			inputs	body	request.AddressPatchReq	true	"Input Field"
-//	@Router			/profile/address [put]
-//	@Success		200	{object}	response.Response{}	"Address deleted successfuly"
-//	@Failure		500	{object}	response.Response{}	"Something went wrong!"
+//	Update user addresss  godoc
+//	@Summary		update addresss
+//	@id				update user addresss
+//	@Description	update the addresss of user
+//	@Tags			User
+//	@Param			input	body	request.AddressPatchReq	true	"inputs"
+//	@Accept			json
+//	@Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
+//  @Failure 		500 {object}	response.Response{} 	"Something went wrong"
+//	@Success		200 {object}	response.Response{}		"Address updated successfully"
+//	@Router			/profile/edit-address [put]
 func (u *UserHandler) UpdateAddress(c *gin.Context) {
-	// Get user id from context
 	userId := utils.GetUserIdFromContext(c)
 	var body request.AddressPatchReq
 	body.UserID = userId
@@ -204,12 +232,19 @@ func (u *UserHandler) UpdateAddress(c *gin.Context) {
 	c.JSON(200, response)
 }
 
+//	Delete user addresss  godoc
+//	@Summary		Delete user addresss
+//	@id				Delete user addresss
+//	@Description	Delete the addresss of user
+//	@Tags			User
+//	@Param			input	body	request.Address	true	"inputs"
+//	@Accept			json
+//	@Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
+//  @Failure 		500 {object}	response.Response{} 	"Something went wrong"
+//	@Success		200 {object}	response.Response{}		"Address deleted successfully"
+//	@Router			/profile/delete-address [delete]
 func (u *UserHandler) DeleteAddress(c *gin.Context) {
-	// Get user id from context
-
 	userId := utils.GetUserIdFromContext(c)
-	fmt.Println(userId)
-
 	addressId, err := utils.StringToUint(c.Param("id"))
 	if err != nil {
 		response := response.ErrorResponse(400, "Missing or invalid entry", err.Error(), nil)
@@ -224,11 +259,20 @@ func (u *UserHandler) DeleteAddress(c *gin.Context) {
 	response := response.SuccessResponse(200, "Address deleted successfuly", nil)
 	c.JSON(200, response)
 }
+
+//	Get all user addresss  godoc
+//	@Summary		Get all user addresss
+//	@id				Get all user addresss
+//	@Description	Get all the addresss of user
+//	@Tags			User
+//	@Param			input	body	request.Address	true	"inputs"
+//	@Accept			json
+//	@Failure		500	{object}	response.Response{}		"User not detected"
+//  @Failure 		500 {object}	response.Response{} 	"Something went wrong"
+//	@Success		200 {object}	response.Response{}		"Get all addresses successfully"
+//	@Router			/profile/getaddress [post]
 func (u *UserHandler) GetAllAddress(c *gin.Context) {
-
-	// Get user id from context
 	userId := utils.GetUserIdFromContext(c)
-
 	if userId == 0 {
 		response := response.ErrorResponse(500, "No user detected!", "", nil)
 		c.IndentedJSON(400, response)

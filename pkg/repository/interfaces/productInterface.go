@@ -16,16 +16,15 @@ type ProductRepository interface {
 	UpdateProduct(ctx context.Context, product domain.Product) error
 	DeleteProduct(ctx context.Context, productID uint) (domain.Product, error)
 
-	//Product Item
-	AddProductItem(ctx context.Context, productItem request.ProductItemReq) error
-	GetProductItems(ctx context.Context, productId uint) ([]response.ProductItemResp, error)
-
-	//GetStockStatusByProductId(c context.Context, productId uint) (qtyLeft uint, err error)
-
-	//UpdateProductItem(ctx context.Context, UpdateData request.UpdateProductItemReq) error
-
-	// Brand CRUD section
 	FindBrand(ctx context.Context, brand request.Category) (request.Category, error)
 	AddCategory(ctx context.Context, brand request.Category) (err error)
 	GetAllBrand(ctx context.Context) (brand []response.Brand, err error)
+
+	AddImage(c context.Context, pid int, filename string) (domain.ProductImage, error)
+
+	//Product Item
+	AddProductItem(ctx context.Context, productItem request.ProductItemReq) error
+	GetProductItems(ctx context.Context, productId uint) ([]response.ProductItemResp, error)
+	//GetStockStatusByProductId(c context.Context, productId uint) (qtyLeft uint, err error)
+	//UpdateProductItem(ctx context.Context, UpdateData request.UpdateProductItemReq) error
 }

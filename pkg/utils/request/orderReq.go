@@ -24,3 +24,8 @@ type RazorPayReq struct {
 	Email        string
 	Phone        string
 }
+
+type PlaceOrderRequest struct {
+	OrderId  int `json:"order_id"`
+	CouponId int `json:"coupon_id,omitempty"`
+}

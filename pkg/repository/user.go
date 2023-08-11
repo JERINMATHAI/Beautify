@@ -23,7 +23,6 @@ func NewUserRepository(DB *gorm.DB) repository.UserRepository {
 
 // Find user is existing or not
 func (u *userDatabase) FindUser(c context.Context, user domain.Users) (domain.Users, error) {
-	//Check any of the user details are same with db user list
 	query := `SELECT * FROM users where id=? OR user_name=? OR email=? OR phone=?`
 	if err := u.DB.Raw(query, user.ID, user.UserName, user.Email, user.Phone).Scan(&user).Error; err != nil {
 		return user, errors.New("Failed to find user")
@@ -31,29 +30,32 @@ func (u *userDatabase) FindUser(c context.Context, user domain.Users) (domain.Us
 	return user, nil
 }
 
-// Save the user if not found the user
-func (u *userDatabase) SaveUser(c context.Context, user domain.Users) error {
-	// Insert values to the user database
+// Save the user if the user is not existing
+func (u *userDatabase) SaveUser(c context.Context, user domain.Users) (response.UserSignUp, error) {
+	var usersignup response.UserSignUp
 	query := `INSERT INTO users (user_name, first_name, last_name, age, email, phone, password,created_at)
 			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 	createdAt := time.Now()
 	if u.DB.Exec(query, user.UserName, user.FirstName, user.LastName, user.Age, user.Email, user.Phone, user.Password, createdAt).Error != nil {
-		return errors.New("Failed to save user")
+		return response.UserSignUp{}, errors.New("Failed to save user")
 	}
-	return nil
+	query2 := `SELECT id, user_name from users where first_name=?`
+	if err := u.DB.Raw(query2, user.FirstName).Scan(&usersignup).Error; err != nil {
+		return response.UserSignUp{}, errors.New("Failed to find user")
+	}
+	return usersignup, nil
 }
 
+//Save user adddress
 func (i *userDatabase) SaveAddress(ctx context.Context, userAddress request.Address) error {
-
 	var defaultAddressID uint
 	userAddress.CreatedAt = time.Now()
-	query := `INSERT INTO addresses (user_id ,house,address_line1,address_line2,city,state,pin_code,country,created_at) 
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`
+	query := `INSERT INTO addresses (user_id ,house,address_line1,address_line2,city,state,pin_code,country,created_at, is_default) 
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`
 	if err := i.DB.Raw(query, userAddress.UserID, userAddress.House, userAddress.AddressLine1,
-		userAddress.AddressLine2, userAddress.City, userAddress.State, userAddress.PinCode, userAddress.Country, userAddress.CreatedAt).Scan(&defaultAddressID).Error; err != nil {
+		userAddress.AddressLine2, userAddress.City, userAddress.State, userAddress.PinCode, userAddress.Country, userAddress.CreatedAt, userAddress.IsDefault).Scan(&defaultAddressID).Error; err != nil {
 		return err
 	}
-
 	// set as default if no existing default address
 	query = `UPDATE addresses
 	SET is_default = true
@@ -70,6 +72,7 @@ func (i *userDatabase) SaveAddress(ctx context.Context, userAddress request.Addr
 	}
 	return nil
 }
+
 func (i *userDatabase) UpdateAddress(ctx context.Context, userAddress request.AddressPatchReq) error {
 	tnx := i.DB.Begin()
 	// Set all addresses of the user to false except for the new address if new address is default
@@ -127,14 +130,14 @@ func (u *userDatabase) GetAllAddress(ctx context.Context, userId uint) (address 
 }
 
 func (i *userDatabase) GetDefaultAddress(ctx context.Context, userId uint) (address response.Address, err error) {
-	fmt.Println("user id", userId)
+	//fmt.Println("user id", userId)
 	query := `SELECT a.id, a.house, a.address_line1, a.address_line2, a.city, a.state, a.pin_code, a.country, a.is_default
 FROM addresses as a
 WHERE a.user_id = ? AND a.is_default = true`
 	if err := i.DB.Raw(query, userId).Scan(&address).Error; err != nil {
 		return address, err
 	}
-	fmt.Println("Address", address)
+	//fmt.Println("Address", address)
 	return address, nil
 }
 
@@ -145,7 +148,7 @@ func (i *userDatabase) GetUserbyID(ctx context.Context, userId uint) (domain.Use
 	if err := i.DB.Raw(query, userId).Scan(&user).Error; err != nil {
 		return user, err
 	}
-	fmt.Println(userId)
+	//fmt.Println(userId)
 	return user, nil
 }
 

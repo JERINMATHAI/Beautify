@@ -1,10 +1,12 @@
 package request
 
-import "time"
+import (
+	"time"
+)
 
 type Address struct {
-	ID           uint      `json:"address_id"`
-	UserID       uint      `json:"-"`
+	ID           uint      `json:"-"`
+	UserID       uint      `json:"user_id"`
 	House        string    `json:"house"`
 	AddressLine1 string    `json:"address_line_1"`
 	AddressLine2 string    `json:"address_line_2"`
