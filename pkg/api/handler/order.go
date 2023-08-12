@@ -464,7 +464,7 @@ func (o *OrderHandler) SalesReport(c *gin.Context) {
 	}
 
 	// Generate a temporary file path for the PDF
-	pdfFilePath := "/home/ubuntu/go/beautify/salesReport/file.pdf"
+	pdfFilePath := "/home/ubuntu/go/Beautify/salesReport/file.pdf"
 
 	// Save the PDF to the temporary file path
 	err = pdf.OutputFileAndClose(pdfFilePath)
