@@ -288,6 +288,14 @@ func (u *UserHandler) GetAllAddress(c *gin.Context) {
 	c.IndentedJSON(200, response)
 }
 
+// Profile godoc
+// @Summary Get user profile
+// @Description Retrieve user profile details from the database
+// @Tags User
+// @Param Authorization header string true "token"
+// @Success 200 {object} response.Response{} "Successfuly got profile"
+// @Failure 500 {object} response.Response{} "Something went wrong!"
+// @Router /profile [get]
 func (u *UserHandler) Profile(c *gin.Context) {
 	userId := utils.GetUserIdFromContext(c)
 
@@ -302,6 +310,15 @@ func (u *UserHandler) Profile(c *gin.Context) {
 
 }
 
+// AddToCart godoc
+// @Summary Add product to cart
+// @Description Add a product item to the user's cart
+// @Tags Cart
+// @Param Authorization header string true "Bearer token"
+// @Param body body request.AddToCartReq true "Product details to be added to cart"
+// @Success 200 {object} response.Response{} "Successfuly added product item to cart"
+// @Failure 400 {object} response.Response{} "Invalid input or failed to add product item to cart"
+// @Router /cart/add [post]
 func (u *UserHandler) AddToCart(c *gin.Context) {
 	var body request.AddToCartReq
 
@@ -325,6 +342,18 @@ func (u *UserHandler) AddToCart(c *gin.Context) {
 	c.JSON(200, response)
 
 }
+
+// GetcartItems godoc
+// @Summary Get user's cart items
+// @Description Retrieve cart items of the user from the database
+// @Tags User
+// @Param Authorization header string true "token"
+// @Param count query int true "Number of items to retrieve"
+// @Param page_number query int true "Page number for pagination"
+// @Success 200 {object} response.Response{} "Get Cart Items successful"
+// @Failure 400 {object} response.Response{} "Missing or invalid inputs"
+// @Failure 500 {object} response.Response{} "Something went wrong!"
+// @Router /cart/get [get]
 func (u *UserHandler) GetcartItems(c *gin.Context) {
 	var page request.ReqPagination
 	count, err0 := utils.StringToUint(c.Query("count"))
@@ -353,6 +382,18 @@ func (u *UserHandler) GetcartItems(c *gin.Context) {
 	response := response.SuccessResponse(200, "Get Cart Items successful", cartItems)
 	c.JSON(http.StatusOK, response)
 }
+
+// UpdateCart godoc
+// @Summary Update user's cart
+// @Description Update cart items of the user in the database
+// @Tags User
+// @Param Authorization header string true "token"
+// @Param input body request.UpdateCartReq true "Cart update details"
+// @Success 200 {object} response.Response{} "Successfuly updated cart"
+// @Failure 400 {object} response.Response{} "invalid input"
+// @Failure 400 {object} response.Response{} "No user id on context"
+// @Failure 500 {object} response.Response{} "Something went wrong!"
+// @Router /cart/update [put]
 func (u *UserHandler) UpdateCart(c *gin.Context) {
 	var body request.UpdateCartReq
 
@@ -398,7 +439,6 @@ func (u *UserHandler) DeleteCartItem(c *gin.Context) {
 
 func (u *UserHandler) AddToWishList(c *gin.Context) {
 	var body request.AddToWishReq
-
 	if err := c.ShouldBindJSON(&body); err != nil {
 		response := response.ErrorResponse(400, "invalid input", err.Error(), body.ProductID)
 		c.JSON(http.StatusBadRequest, response)

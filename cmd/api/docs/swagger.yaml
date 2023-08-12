@@ -1,4 +1,44 @@
 definitions:
+  domain.PaymentMethod:
+    properties:
+      id:
+        type: integer
+      payment_method:
+        type: string
+    type: object
+  request.AddToCartReq:
+    properties:
+      product_id:
+        type: integer
+      quantity:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - product_id
+    - quantity
+    type: object
+  request.Address:
+    properties:
+      address_line_1:
+        type: string
+      address_line_2:
+        type: string
+      city:
+        type: string
+      country:
+        type: string
+      house:
+        type: string
+      is_default:
+        type: boolean
+      pin_code:
+        type: string
+      state:
+        type: string
+      user_id:
+        type: integer
+    type: object
   request.AddressPatchReq:
     properties:
       address_id:
@@ -27,6 +67,13 @@ definitions:
     required:
     - user_id
     type: object
+  request.Category:
+    properties:
+      brand_category_name:
+        type: string
+      id:
+        type: integer
+    type: object
   request.CreateCoupon:
     properties:
       code:
@@ -39,6 +86,13 @@ definitions:
         type: number
       valid_till:
         type: string
+    type: object
+  request.DeleteProductReq:
+    properties:
+      Prod_id:
+        type: integer
+    required:
+    - Prod_id
     type: object
   request.LoginData:
     properties:
@@ -67,6 +121,26 @@ definitions:
     required:
     - otp
     - user_id
+    type: object
+  request.ProductReq:
+    properties:
+      brand_id:
+        type: integer
+      description:
+        maxLength: 1000
+        minLength: 10
+        type: string
+      price:
+        type: integer
+      product_name:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - brand_id
+    - description
+    - price
+    - product_name
     type: object
   request.SignupUserData:
     properties:
@@ -101,6 +175,44 @@ definitions:
     - phone
     - user_name
     type: object
+  request.UpdateCartReq:
+    properties:
+      product_id:
+        type: integer
+      quantity:
+        type: integer
+    required:
+    - product_id
+    - quantity
+    type: object
+  request.UpdateOrder:
+    properties:
+      address_id:
+        type: integer
+      delivery_status:
+        type: string
+      order_id:
+        type: integer
+      payment_status:
+        type: string
+      paymentmethod_id:
+        type: integer
+    type: object
+  request.UpdateProductReq:
+    properties:
+      brand_id:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      price:
+        type: integer
+      product_name:
+        type: string
+    type: object
   response.Response:
     properties:
       data: {}
@@ -113,6 +225,20 @@ definitions:
 info:
   contact: {}
 paths:
+  /:
+    get:
+      consumes:
+      - application/json
+      description: Home page for user
+      operationId: User Home
+      responses:
+        "200":
+          description: Welcome to home !
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: User Home
+      tags:
+      - User
   /admin/:
     get:
       description: Welcome to Admin Home
@@ -125,7 +251,69 @@ paths:
       summary: Admin Home
       tags:
       - Admin
-  /admin/coupons:
+  /admin/brands:
+    get:
+      description: Get a list of all product brands from the database
+      responses:
+        "200":
+          description: Successfuly listed all brands
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Failed to get brands
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get a list of all product brands
+      tags:
+      - Product
+    post:
+      description: Add a new product category or brand to the database
+      parameters:
+      - description: Category or Brand details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.Category'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Missing or invalid entry or Failed to add brand
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Add a new product category or brand
+      tags:
+      - Product
+  /admin/coupons/create:
+    post:
+      description: Create coupons
+      parameters:
+      - description: inputs
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateCoupon'
+      responses:
+        "200":
+          description: Coupon created successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Missing or invalid inputs
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Create coupons
+      tags:
+      - Coupon
+  /admin/coupons/list:
     post:
       description: List all coupons
       parameters:
@@ -153,6 +341,47 @@ paths:
       summary: List all coupons
       tags:
       - Coupon
+  /admin/dashboard/salesReport:
+    get:
+      description: Generate a sales report in PDF format based on provided filters
+      parameters:
+      - description: Count of items per page
+        in: query
+        name: count
+        required: true
+        type: integer
+      - description: Page Number
+        in: query
+        name: page_number
+        required: true
+        type: integer
+      - description: Start Date (YYYY-MM-DD)
+        in: query
+        name: startDate
+        required: true
+        type: string
+      - description: End Date (YYYY-MM-DD)
+        in: query
+        name: endDate
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Successfully generated pdf
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid inputs or Please add start date as params or Please
+            add end date as params or There is no sales report on this period
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Failed to generate PDF
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Generate sales report PDF
+      tags:
+      - Order
   /admin/login:
     post:
       consumes:
@@ -182,6 +411,224 @@ paths:
       summary: Admin Login
       tags:
       - Admin
+  /admin/payment/add:
+    get:
+      description: Get payment method
+      parameters:
+      - description: inputs
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.PaymentMethod'
+      responses:
+        "200":
+          description: List of payment methods
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: invalid inputs
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: ' internal server error'
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get payment method
+      tags:
+      - Payment
+    post:
+      description: Add payment method
+      parameters:
+      - description: inputs
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.PaymentMethod'
+      responses:
+        "200":
+          description: Successfully added payment method
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Can't add payment method
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Add payment method
+      tags:
+      - Payment
+  /admin/payment/delete:
+    delete:
+      description: Delete payment method
+      parameters:
+      - description: inputs
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.PaymentMethod'
+      responses:
+        "200":
+          description: successfully deleted method
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: can't delete payment method
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Delete payment method
+      tags:
+      - Payment
+  /admin/payment/update:
+    patch:
+      description: Update payment method
+      parameters:
+      - description: inputs
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.PaymentMethod'
+      responses:
+        "200":
+          description: successfully updated method
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Can't update data
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Update payment method
+      tags:
+      - Payment
+  /admin/products/add:
+    post:
+      description: Add a new product to the database
+      parameters:
+      - description: Product details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.ProductReq'
+      responses:
+        "200":
+          description: Product added successful
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Missing or invalid entry or Failed to add product
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Add a new product
+      tags:
+      - Product
+  /admin/products/addimage:
+    post:
+      description: Add images to a product in the database
+      parameters:
+      - description: Product ID
+        in: formData
+        name: product_id
+        required: true
+        type: integer
+      - description: Image file
+        in: formData
+        name: image
+        required: true
+        type: file
+      responses:
+        "200":
+          description: Successfully added images
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Error while fetching product_id or Error while fetching image
+            file or No image files found or Can't be add images
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Add images to a product
+      tags:
+      - Product
+  /admin/products/delete:
+    delete:
+      description: Delete a product from the database
+      parameters:
+      - description: Product ID to be deleted
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.DeleteProductReq'
+      responses:
+        "200":
+          description: Successfully deleted product
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Missing or invalid input
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Failed to delete product
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Delete a product
+      tags:
+      - Product
+  /admin/products/list:
+    get:
+      description: List products from the database
+      parameters:
+      - description: Count of items per page
+        in: query
+        name: count
+        required: true
+        type: integer
+      - description: Page Number
+        in: query
+        name: page_number
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Product listed successfuly
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: invalid inputs
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: failed to get all products
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: List products
+      tags:
+      - Product
+  /admin/products/update:
+    put:
+      description: Update a product in the database
+      parameters:
+      - description: Updated product details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateProductReq'
+      responses:
+        "200":
+          description: Product updated successful
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Missing or invalid input or failed to update product
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Update a product
+      tags:
+      - Product
   /admin/signup:
     post:
       consumes:
@@ -232,6 +679,99 @@ paths:
       summary: Admin Block Users
       tags:
       - Admin
+  /cart/add:
+    post:
+      description: Add a product item to the user's cart
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Product details to be added to cart
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.AddToCartReq'
+      responses:
+        "200":
+          description: Successfuly added product item to cart
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid input or failed to add product item to cart
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Add product to cart
+      tags:
+      - Cart
+  /cart/get:
+    get:
+      description: Retrieve cart items of the user from the database
+      parameters:
+      - description: token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Number of items to retrieve
+        in: query
+        name: count
+        required: true
+        type: integer
+      - description: Page number for pagination
+        in: query
+        name: page_number
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Get Cart Items successful
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Missing or invalid inputs
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Something went wrong!
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get user's cart items
+      tags:
+      - User
+  /cart/update:
+    put:
+      description: Update cart items of the user in the database
+      parameters:
+      - description: token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Cart update details
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateCartReq'
+      responses:
+        "200":
+          description: Successfuly updated cart
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: No user id on context
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Something went wrong!
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Update user's cart
+      tags:
+      - User
   /login:
     post:
       consumes:
@@ -290,31 +830,362 @@ paths:
       summary: User OTP Verification
       tags:
       - User
-  /profile/address:
-    put:
-      description: user can update a address
-      operationId: DeleteAddress
-      parameters:
-      - description: Input Field
-        in: body
-        name: inputs
-        required: true
-        schema:
-          $ref: '#/definitions/request.AddressPatchReq'
+  /logout:
+    get:
+      consumes:
+      - application/json
+      description: Logout from user account
+      operationId: User Logout
       responses:
         "200":
-          description: Address deleted successfuly
+          description: Log out successful
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: User Logout
+      tags:
+      - User
+  /order/all:
+    get:
+      description: Get a list of all orders
+      parameters:
+      - description: Page Number
+        in: query
+        name: page_number
+        required: true
+        type: integer
+      - description: Count of items per page
+        in: query
+        name: count
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Get Orders successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Missing or invalid inputs
           schema:
             $ref: '#/definitions/response.Response'
         "500":
           description: Something went wrong!
           schema:
             $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: api for update user address
+      summary: Get all orders
       tags:
-      - Update Order
+      - Order
+  /order/cancelOrder:
+    delete:
+      description: Cancel an order based on the provided order ID
+      parameters:
+      - description: Order ID
+        in: query
+        name: order_id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Successfully deleted order
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Please add id as params or Can't delete order
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Cancel an order
+      tags:
+      - Order
+  /order/createOrder:
+    post:
+      description: Create an order with specified address and payment method
+      parameters:
+      - description: Address ID
+        in: query
+        name: address_id
+        required: true
+        type: integer
+      - description: Payment Method ID
+        in: query
+        name: paymentmethod_id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Successfully created order. Please complete payment
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Failed to get address id or Failed to get payment method id
+            or Failed to get total amount or Failed to create order
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Create an order
+      tags:
+      - Order
+  /order/listOrder:
+    get:
+      description: List all orders for the authenticated user
+      parameters:
+      - description: Page Number
+        in: query
+        name: page_number
+        required: true
+        type: integer
+      - description: Count of items per page
+        in: query
+        name: count
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Get Orders successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Missing or invalid inputs
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Something went wrong!
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: List all orders
+      tags:
+      - Order
+  /order/payment:
+    post:
+      description: Process order checkout and generate payment information
+      parameters:
+      - description: Order ID
+        in: query
+        name: order_id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Successfully confirmed order or generated payment information
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Please add order_id as params or Failed to find payment method
+            or Failed to place order or error while getting id from cookie or error
+            while getting total amount or error while getting details or failed to
+            create razorpay order
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Process order checkout
+      tags:
+      - Order
+  /order/placeOrder:
+    post:
+      description: Place an order and apply a coupon if available
+      parameters:
+      - description: Order ID
+        in: query
+        name: order_id
+        required: true
+        type: integer
+      - description: Coupon ID (optional)
+        in: query
+        name: coupon_id
+        type: integer
+      responses:
+        "200":
+          description: Successfully confirmed order, complete payment process on delivery
+            or placed order with complete payment details
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid coupon or Add more quantity or Failed to place order
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Place an order
+      tags:
+      - Order
+  /order/updateOrder:
+    put:
+      description: Update order details based on provided data
+      parameters:
+      - description: Update Order Details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateOrder'
+      responses:
+        "200":
+          description: Successfully updated order
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Error while getting data from users or Error while updating
+            data
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Update order details
+      tags:
+      - Order
+  /profile:
+    get:
+      description: Retrieve user profile details from the database
+      parameters:
+      - description: token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Successfuly got profile
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Something went wrong!
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get user profile
+      tags:
+      - User
+  /profile/add-address:
+    post:
+      consumes:
+      - application/json
+      description: Add the addresss of user
+      operationId: Add user addresss
+      parameters:
+      - description: inputs
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/request.Address'
+      responses:
+        "200":
+          description: Address saved successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Missing or Invalid entry
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Something went wrong
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Add user addresss
+      tags:
+      - User
+  /profile/delete-address:
+    delete:
+      consumes:
+      - application/json
+      description: Delete the addresss of user
+      operationId: Delete user addresss
+      parameters:
+      - description: inputs
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/request.Address'
+      responses:
+        "200":
+          description: Address deleted successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Missing or Invalid entry
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Something went wrong
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Delete user addresss
+      tags:
+      - User
+  /profile/edit-address:
+    put:
+      consumes:
+      - application/json
+      description: update the addresss of user
+      operationId: update user addresss
+      parameters:
+      - description: inputs
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/request.AddressPatchReq'
+      responses:
+        "200":
+          description: Address updated successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Missing or Invalid entry
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Something went wrong
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: update addresss
+      tags:
+      - User
+  /profile/getaddress:
+    post:
+      consumes:
+      - application/json
+      description: Get all the addresss of user
+      operationId: Get all user addresss
+      parameters:
+      - description: inputs
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/request.Address'
+      responses:
+        "200":
+          description: Get all addresses successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Something went wrong
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get all user addresss
+      tags:
+      - User
+  /return/product:
+    post:
+      description: Request to return an order based on the provided order ID and reason
+      parameters:
+      - description: Order ID
+        in: query
+        name: orderId
+        required: true
+        type: integer
+      - description: Reason for return
+        in: query
+        name: reason
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Successfully requested to return products
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Please add order id as params or Error while getting id from
+            cookie or Invalid order_id or Failed to find refund amount or Failed to
+            return order
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Request to return an order
+      tags:
+      - Order
   /signup:
     post:
       consumes:
