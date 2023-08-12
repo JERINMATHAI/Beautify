@@ -234,3 +234,22 @@ func (o *OrderUseCase) SalesReport(c context.Context, page request.ReqPagination
 	}
 	return salesReport, nil
 }
+
+func (o *OrderUseCase) CreateUserWallet(userID uint) error {
+	wallet, err := o.OrderRepository.FindUserWallet(userID)
+	if err != nil {
+		return fmt.Errorf("Failed to check user wallet :%s", err)
+	}
+
+	if wallet.ID != 0 {
+		return fmt.Errorf("User already have wallet")
+	}
+	Wallet, err := o.OrderRepository.InitializeNewWallet(userID)
+	if err != nil {
+		return fmt.Errorf("Failed to initialize wallet for user %d : %s", userID, err)
+	}
+	if Wallet.ID == 0 {
+		return fmt.Errorf("Failed to verify new wallet for user id  %d", userID)
+	}
+	return nil
+}

@@ -28,4 +28,5 @@ type OrderService interface {
 	VerifyOrderID(c context.Context, id uint, orderid uint) error
 
 	SalesReport(c context.Context, page request.ReqPagination, salesData request.ReqSalesReport) ([]response.SalesReport, error)
+	CreateUserWallet(userID uint) error
 }

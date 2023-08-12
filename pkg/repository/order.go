@@ -313,10 +313,26 @@ func (o *OrderDatabase) SalesReport(c context.Context, page request.ReqPaginatio
 	return sales, nil
 }
 
-func (o *OrderDatabase) InsertIntoWallet(userID int, amount float32) (response.Wallet, error) {
+func (o *OrderDatabase) InsertIntoWallet(userID uint, amount float32) (response.Wallet, error) {
 	var InsertedRecord response.Wallet
 
 	query := `INSERT INTO wallets (user_id,amount)VALUES($1,$2) RETURNING *;`
 	err := o.DB.Raw(query, userID, amount).Scan(&InsertedRecord).Error
 	return InsertedRecord, err
+}
+
+func (o *OrderDatabase) InitializeNewWallet(userID uint) (response.Wallet, error) {
+	var NewWallet response.Wallet
+
+	query := `INSERT INTO wallets (user_id,amount)VALUES($1,$2) RETURNING *;`
+	err := o.DB.Raw(query, userID, 0).Scan(&NewWallet).Error
+	return NewWallet, err
+}
+
+func (o *OrderDatabase) FindUserWallet(userID uint) (response.Wallet, error) {
+	var Wallet response.Wallet
+
+	query := `SELECT * FROM wallets WHERE user_id = $1 ;`
+	err := o.DB.Raw(query, userID).Scan(&Wallet).Error
+	return Wallet, err
 }

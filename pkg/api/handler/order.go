@@ -484,3 +484,17 @@ func (o *OrderHandler) SalesReport(c *gin.Context) {
 	response := response.SuccessResponse(200, "Successfully generated pdf", " ")
 	c.JSON(200, response)
 }
+
+func (o *OrderHandler) CreateUserWallet(c *gin.Context) {
+	userID := utils.GetUserIdFromContext(c)
+
+	err := o.OrderService.CreateUserWallet(userID)
+	if err != nil {
+		response := response.ErrorResponse(500, "Failed", err.Error(), nil)
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	response := response.SuccessResponse(200, "Success, wallet initialized", nil, nil)
+	c.JSON(http.StatusOK, response)
+}

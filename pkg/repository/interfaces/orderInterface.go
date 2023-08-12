@@ -33,5 +33,7 @@ type OrderRepository interface {
 	ReturnRequest(c context.Context, returnOrder domain.OrderReturn) (response.ReturnResponse, error)
 	VerifyOrderID(c context.Context, id uint, orderid uint) error
 
-	InsertIntoWallet(userID int, amount float32) (response.Wallet, error)
+	InsertIntoWallet(userID uint, amount float32) (response.Wallet, error)
+	InitializeNewWallet(userID uint) (response.Wallet, error)
+	FindUserWallet(userID uint) (response.Wallet, error)
 }
