@@ -29,4 +29,6 @@ type OrderService interface {
 
 	SalesReport(c context.Context, page request.ReqPagination, salesData request.ReqSalesReport) ([]response.SalesReport, error)
 	CreateUserWallet(userID uint) error
+
+	GetAllPendingReturnRequest(c context.Context, page request.ReqPagination) (ReturnRequests []response.ReturnRequests, err error)
 }

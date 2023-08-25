@@ -14,12 +14,22 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// type adminService struct {
+// 	adminRepository interfaces.AdminRepository
+// }
+
+// func NewAdminService(repo interfaces.AdminRepository) service.AdminService {
+// 	return &adminService{adminRepository: repo}
+// }
+
 type adminService struct {
-	adminRepository interfaces.AdminRepository
+	adminRepository   interfaces.AdminRepository
+	PaymentRepository interfaces.PaymentRepository
 }
 
-func NewAdminService(repo interfaces.AdminRepository) service.AdminService {
-	return &adminService{adminRepository: repo}
+func NewAdminService(repo interfaces.AdminRepository, PaymentRepo interfaces.PaymentRepository) service.AdminService {
+	return &adminService{adminRepository: repo,
+		PaymentRepository: PaymentRepo}
 }
 
 // Signup
@@ -76,4 +86,21 @@ func (a *adminService) GetAllUser(c context.Context, page request.ReqPagination)
 func (a *adminService) BlockUser(c context.Context, userID uint) error {
 
 	return a.adminRepository.BlockUser(c, userID)
+}
+
+func (o *adminService) ApproveReturnOrder(c context.Context, data request.ApproveReturnRequest) error {
+	// get payment data
+	// ID 2 is for status "Paid"
+	payment, err := o.PaymentRepository.GetPaymentDataByOrderId(c, data.OrderID)
+
+	if err != nil {
+		return err
+	}
+
+	data.OrderTotal = payment.OrderTotal
+	err = o.adminRepository.ApproveReturnOrder(c, data)
+	if err != nil {
+		return err
+	}
+	return nil
 }

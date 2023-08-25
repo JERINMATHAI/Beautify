@@ -183,3 +183,11 @@ func (u *UserUseCase) RemoveWishListItem(ctx context.Context, DelWishListItem re
 	}
 	return nil
 }
+
+func (u *UserUseCase) GetWalletHistory(ctx context.Context, userId uint) (wallet []domain.Wallet, err error) {
+	wallet, err = u.userRepository.GetWalletHistory(ctx, userId)
+	if err != nil {
+		return wallet, err
+	}
+	return wallet, nil
+}

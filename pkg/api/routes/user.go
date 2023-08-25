@@ -76,6 +76,10 @@ func UserRoutes(api *gin.RouterGroup, userHandler *handler.UserHandler, productH
 		{
 			Return.POST("/product", orderHandler.ReturnOrder)
 		}
+		wallet := api.Group("/wallet")
+		{
+			wallet.GET("/history", userHandler.GetWalletHistory)
+		}
 	}
 
 }

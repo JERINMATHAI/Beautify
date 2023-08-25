@@ -30,3 +30,12 @@ type OrderReturn struct {
 	ReturnDate   time.Time `json:"return_date"`
 	ReturnStatus string    `json:"return_status"`
 }
+
+// type Return struct {
+// 	ID          uint      `gorm:"primaryKey"`
+// 	ShopOrderID int       `json:"order_id"`
+// 	ShopOrder   ShopOrder `gorm:"foreignKey:ShopOrderID"`
+// 	Reason      string    `json:"string"`
+// 	IsApproved  bool      `json:"approved" gorm:"default:false"`
+// 	RequestedAt time.Time `json:"requested_at"`
+// }

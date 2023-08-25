@@ -506,3 +506,15 @@ func (u *UserHandler) DeleteWishListItem(c *gin.Context) {
 	response := response.SuccessResponse(200, "Successfuly removed item from wish list", body)
 	c.JSON(200, response)
 }
+
+func (u *UserHandler) GetWalletHistory(c *gin.Context) {
+	userId := utils.GetUserIdFromContext(c)
+	history, err := u.userService.GetWalletHistory(c, userId)
+	if err != nil {
+		response := response.ErrorResponse(500, "Something went wrong!", err.Error(), nil)
+		c.IndentedJSON(500, response)
+		return
+	}
+	response := response.SuccessResponse(200, "Get wallet history successful", history)
+	c.IndentedJSON(200, response)
+}

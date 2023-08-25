@@ -103,6 +103,10 @@ func (o *OrderUseCase) DeleteOrder(c context.Context, order_id uint) error {
 }
 
 func (o *OrderUseCase) PlaceOrder(c context.Context, order domain.Order) (response.PaymentResponse, error) {
+	err1 := o.OrderRepository.FindOrder(c, order)
+	if err1 != nil {
+		return response.PaymentResponse{}, err1
+	}
 	method_Id, err := o.OrderRepository.FindPaymentMethodIdByOrderId(c, order.Order_Id)
 	if err != nil {
 		return response.PaymentResponse{}, err
@@ -136,6 +140,7 @@ func (o *OrderUseCase) ValidateCoupon(c context.Context, CouponId uint) (respons
 	if err != nil {
 		return response.CouponResponse{}, err
 	}
+
 	return couponResp, nil
 }
 
@@ -145,7 +150,7 @@ func (o *OrderUseCase) ApplyDiscount(c context.Context, CouponResponse response.
 		return 0, nil
 	}
 
-	totalamnt := order.Total_Amount - float64(CouponResponse.Discount)
+	totalamnt := order.Total_Amount - (order.Total_Amount * (CouponResponse.DiscountPercent / 100))
 
 	return int(totalamnt), nil
 
@@ -252,4 +257,12 @@ func (o *OrderUseCase) CreateUserWallet(userID uint) error {
 		return fmt.Errorf("Failed to verify new wallet for user id  %d", userID)
 	}
 	return nil
+}
+
+func (o *OrderUseCase) GetAllPendingReturnRequest(c context.Context, page request.ReqPagination) (ReturnRequests []response.ReturnRequests, err error) {
+	ReturnRequests, err = o.OrderRepository.GetAllPendingReturnOrder(c, page)
+	if err != nil {
+		return ReturnRequests, err
+	}
+	return ReturnRequests, nil
 }

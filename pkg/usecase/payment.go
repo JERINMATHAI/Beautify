@@ -59,3 +59,11 @@ func (p *PaymentUseCase) UpdatePaymentMethod(c context.Context, payment domain.P
 	}
 	return paymentresp, nil
 }
+
+func (p *PaymentUseCase) GetPaymentDataByOrderId(ctx context.Context, orderId uint) (paymentData domain.PaymentDetails, err error) {
+	paymentData, err = p.PaymentRepository.GetPaymentDataByOrderId(ctx, orderId)
+	if err != nil {
+		return paymentData, err
+	}
+	return paymentData, nil
+}

@@ -14,12 +14,21 @@ import (
 	"gorm.io/gorm"
 )
 
+// type adminDatabase struct {
+// 	DB *gorm.DB
+// }
+
+// func NewAdminRepository(db *gorm.DB) interfaces.AdminRepository {
+// 	return &adminDatabase{DB: db}
+// }
 type adminDatabase struct {
-	DB *gorm.DB
+	DB           *gorm.DB
+	userDatabase interfaces.UserRepository
 }
 
-func NewAdminRepository(db *gorm.DB) interfaces.AdminRepository {
-	return &adminDatabase{DB: db}
+func NewAdminRepository(db *gorm.DB, userRepo interfaces.UserRepository) interfaces.AdminRepository {
+	return &adminDatabase{DB: db,
+		userDatabase: userRepo}
 }
 
 // SaveAdmin - Inserts a new admin record into the database.
@@ -69,4 +78,39 @@ func (a *adminDatabase) BlockUser(ctx context.Context, userID uint) error {
 		return fmt.Errorf("Failed to update user block_status to %v", !user.BlockStatus)
 	}
 	return nil
+}
+
+func (a *adminDatabase) ApproveReturnOrder(c context.Context, data request.ApproveReturnRequest) error {
+	var order_return domain.OrderReturn
+	query := `UPDATE order_returns
+	SET is_approved = $1
+	WHERE order_id = $2 AND is_approved = false`
+
+	err := a.DB.Exec(query, data.IsApproved, data.OrderID).Error
+	if err != nil {
+		return err
+	}
+
+	query2 := `SELECT * FROM order_returns WHERE order_id=?`
+	err2 := a.DB.Raw(query2, data.OrderID).Scan(&order_return).Error
+	if err2 != nil {
+		return err
+	}
+	fmt.Println(order_return)
+	// add amount to user wallet
+	if data.IsApproved {
+
+		err := a.userDatabase.CreditUserWallet(c, domain.Wallet{
+			UserID:  data.UserID,
+			Balance: float64(order_return.RefundAmount),
+			Remark:  data.Comment,
+		})
+		if err != nil {
+			return err
+		}
+	} else {
+		return errors.New("return request denied by admin")
+	}
+	return nil
+
 }

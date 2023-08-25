@@ -14,8 +14,6 @@ type PaymentDetails struct {
 	PaymentStatusID uint          `json:"payment_status_id,omitempty"`
 	PaymentStatus   PaymentStatus `gorm:"foreignKey:PaymentStatusID" json:"-"`
 	PaymentRef      string        `gorm:"default:null;uniqueIndex" json:"payment_ref"`
-	//UpdatedAt       time.Time
-	// ShopOrder       ShopOrder     `gorm:"foreignKey:ShopOrderID" json:"-"`
 }
 
 type PaymentStatus struct {

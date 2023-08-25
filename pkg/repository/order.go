@@ -7,6 +7,7 @@ import (
 	"beautify/pkg/utils/response"
 	"context"
 	"errors"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -117,6 +118,21 @@ func (o *OrderDatabase) DeleteOrder(c context.Context, order_id uint) error {
 	return nil
 }
 
+func (o *OrderDatabase) FindOrder(c context.Context, order domain.Order) error {
+	status := "Order cancelled"
+	query := `select * from orders where order_id=? and order_status=?`
+	err := o.DB.Raw(query, order.Order_Id, status).Scan(&order).Error
+	fmt.Println("hello", order, "error", err)
+	if order.Order_Id == 0 {
+		fmt.Println("Order Not Found")
+		return errors.New("Order Not Found")
+	}
+	if order.Order_Status == status {
+		return errors.New("Order already cancelled")
+	}
+	return nil
+}
+
 //Place order- Apply coupon
 func (o *OrderDatabase) PlaceOrder(c context.Context, order domain.Order) (response.PaymentResponse, error) {
 	var paymentresp response.PaymentResponse
@@ -128,12 +144,12 @@ func (o *OrderDatabase) PlaceOrder(c context.Context, order domain.Order) (respo
 	}
 	err2 := o.DB.Where("id=?", order.Applied_Coupon_id).Delete(&coupon).Error
 	if err2 != nil {
-		return response.PaymentResponse{}, errors.New("error while deleting used coupon")
+		return response.PaymentResponse{}, errors.New("Error while deleting used coupon")
 	}
 	query1 := `select order_id, total_amount, order_status, address_id, payment_method_id, payment_status from orders where order_id=?`
 	err1 := o.DB.Raw(query1, order.Order_Id).Scan(&paymentresp).Error
 	if err1 != nil {
-		return response.PaymentResponse{}, errors.New("failed to display order details")
+		return response.PaymentResponse{}, errors.New("Failed to display order details")
 	}
 	return paymentresp, nil
 }
@@ -150,6 +166,7 @@ func (o *OrderDatabase) FindPaymentMethodIdByOrderId(c context.Context, order_id
 
 //Validate coupon
 func (o *OrderDatabase) ValidateCoupon(c context.Context, CouponId uint) (response.CouponResponse, error) {
+
 	var couponResp response.CouponResponse
 	query := `select discount_percent,valid_till from coupons where id=?`
 	err := o.DB.Raw(query, CouponId).Scan(&couponResp).Error
@@ -335,4 +352,40 @@ func (o *OrderDatabase) FindUserWallet(userID uint) (response.Wallet, error) {
 	query := `SELECT * FROM wallets WHERE user_id = $1 ;`
 	err := o.DB.Raw(query, userID).Scan(&Wallet).Error
 	return Wallet, err
+}
+
+func (o *OrderDatabase) GetAllPendingReturnOrder(c context.Context, page request.ReqPagination) (ReturnRequests []response.ReturnRequests, err error) {
+	limit := page.Count
+	offset := (page.PageNumber - 1) * limit
+	query := `SELECT 
+    r.id AS return_id,
+    o.user_id,
+    o.order_id,
+    r.request_date,
+    o.order_date AS requested_at,
+    pm.payment_method,
+    ps.status AS payment_status,
+    r.return_reason AS reason,
+    o.total_amount AS order_total,
+    r.is_approved
+FROM 
+    order_returns r
+LEFT JOIN 
+    orders o ON o.id = r.order_id
+LEFT JOIN 
+    payment_methods pm ON pm.id = o.payment_method_id
+LEFT JOIN 
+    payment_details pd ON pd.order_id = o.id
+LEFT JOIN 
+    payment_statuses ps ON ps.id = pd.payment_status_id
+WHERE 
+    r.is_approved = false
+ORDER BY 
+    r.request_date ASC
+ LIMIT $1 OFFSET $2`
+	err = o.DB.Raw(query, limit, offset).Scan(&ReturnRequests).Error
+	if err != nil {
+		return ReturnRequests, err
+	}
+	return ReturnRequests, nil
 }

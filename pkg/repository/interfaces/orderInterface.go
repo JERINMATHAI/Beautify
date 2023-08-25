@@ -20,6 +20,7 @@ type OrderRepository interface {
 	FindCouponById(c context.Context, couponId uint) error
 	GetTotalAmount(c context.Context, userid int) ([]domain.Cart, error)
 
+	FindOrder(c context.Context, order domain.Order) error
 	PlaceOrder(c context.Context, order domain.Order) (response.PaymentResponse, error)
 	ValidateCoupon(c context.Context, CouponId uint) (response.CouponResponse, error)
 	ApplyDiscount(c context.Context, order_id uint) (domain.Order, error)
@@ -36,4 +37,5 @@ type OrderRepository interface {
 	InsertIntoWallet(userID uint, amount float32) (response.Wallet, error)
 	InitializeNewWallet(userID uint) (response.Wallet, error)
 	FindUserWallet(userID uint) (response.Wallet, error)
+	GetAllPendingReturnOrder(c context.Context, page request.ReqPagination) (ReturnRequests []response.ReturnRequests, err error)
 }

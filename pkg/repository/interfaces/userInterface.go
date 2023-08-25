@@ -30,4 +30,7 @@ type UserRepository interface {
 	GetWishIdByUserId(ctx context.Context, userId uint) (wishId uint, err error)
 	GetWishListItemsbyUserId(ctx context.Context, page request.ReqPagination, userID uint) (WishItems []response.WishItemResp, err error)
 	RemoveWishListItem(ctx context.Context, DeleteWishListItemReq request.DeleteWishItemReq) error
+
+	GetWalletHistory(ctx context.Context, userId uint) (wallet []domain.Wallet, err error)
+	CreditUserWallet(ctx context.Context, data domain.Wallet) error
 }

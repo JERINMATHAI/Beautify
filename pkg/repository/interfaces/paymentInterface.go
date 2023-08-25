@@ -13,4 +13,5 @@ type PaymentRepository interface {
 	FindPaymentMethodId(c context.Context, method_id uint) (uint, error)
 	UpdatePaymentMethod(c context.Context, payment domain.PaymentMethod) (domain.PaymentMethod, error)
 	DeleteMethod(c context.Context, id uint) error
+	GetPaymentDataByOrderId(ctx context.Context, orderId uint) (paymentData domain.PaymentDetails, err error)
 }

@@ -63,6 +63,7 @@ func (o *OrderHandler) CreateOrder(c *gin.Context) {
 	order.Order_Status = "Order Created"
 	order.DeliveryStatus = "Pending"
 	order.User_Id = userId
+	fmt.Println("user id- Create order", userId)
 
 	orderResp, err := o.OrderService.CreateOrder(c, order)
 	if err != nil {
@@ -211,7 +212,6 @@ func (o *OrderHandler) PlaceOrder(c *gin.Context) {
 	var order domain.Order
 	order_id, _ := strconv.Atoi(c.Query("order_id"))
 	coupon_id, _ := strconv.Atoi(c.Query("coupon_id"))
-
 	placeorder.CouponId = coupon_id
 	placeorder.OrderId = order_id
 	order.Order_Id = uint(order_id)
@@ -223,6 +223,7 @@ func (o *OrderHandler) PlaceOrder(c *gin.Context) {
 		c.JSON(400, response)
 		return
 	} else {
+
 		totalamnt, err := o.OrderService.ApplyDiscount(c, couponResp, uint(order_id))
 		if err != nil {
 			response := response.ErrorResponse(400, "Add more quantity", err.Error(), "try again")
@@ -349,7 +350,7 @@ func (o *OrderHandler) ReturnOrder(c *gin.Context) {
 
 	returnOrder.OrderID = uint(order_id)
 	returnOrder.RequestDate = time.Now()
-	returnOrder.ReturnReason = c.Query("reason")
+	returnOrder.ReturnReason = c.Query("Damage")
 	returnOrder.ReturnStatus = "Return Requested"
 	//finding total amount by orderid
 	total_amount, err := o.OrderService.FindTotalAmountByOrderId(c, uint(order_id))

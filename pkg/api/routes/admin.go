@@ -29,6 +29,9 @@ func AdminRoutes(api *gin.RouterGroup, adminHandler *handler.AdminHandler, produ
 		{
 			user.GET("/", adminHandler.ListUsers)
 			user.PATCH("/block", adminHandler.BlockUser)
+			user.GET("/return-orders", adminHandler.GetAllReturnOrder)
+			user.PATCH("/return-orders/approval", adminHandler.ApproveReturnOrder)
+			//user.PATCH("/orders/delivery-update", adminHandler.UpdateDeliveryStatus)
 		}
 
 		brand := api.Group("/brands")

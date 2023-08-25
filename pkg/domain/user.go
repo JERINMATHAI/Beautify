@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -18,6 +20,7 @@ type Users struct {
 }
 
 type Address struct {
+	gorm.Model
 	ID           uint   `json:"id" gorm:"primaryKey;unique;autoIncrement"`
 	UserID       uint   `json:"-"`
 	House        string `json:"house" gorm:"not null"`
@@ -61,4 +64,13 @@ type WishList struct {
 	ID     uint    `gorm:"primaryKey"`
 	UserID uint    `gorm:"not null"`
 	Total  float64 `gorm:"default:0"`
+}
+
+type Wallet struct {
+	ID        uint    `gorm:"primaryKey"`
+	UserID    uint    `gorm:"not null"`
+	Balance   float64 `gorm:"not null"`
+	Remark    string
+	UpdatedAt time.Time
+	CreatedAt time.Time
 }

@@ -22,6 +22,7 @@ type UserService interface {
 	SaveWishListItem(ctx context.Context, addToWishList request.AddToWishReq) error
 	GetWishListItemsbyCartId(ctx context.Context, page request.ReqPagination, userID uint) (WishItems []response.WishItemResp, err error)
 	RemoveWishListItem(ctx context.Context, DelWishListItem request.DeleteWishItemReq) error
-	//TODO
+
 	Profile(ctx context.Context, userId uint) (profile response.Profile, err error)
+	GetWalletHistory(ctx context.Context, userId uint) (wallet []domain.Wallet, err error)
 }
