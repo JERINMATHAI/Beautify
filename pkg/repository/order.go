@@ -390,8 +390,8 @@ ORDER BY
 	return ReturnRequests, nil
 }
 
-func (i *userDatabase) ClearWalletHistory(ctx context.Context, userId uint) error {
+func (o *OrderDatabase) ClearWalletHistory(ctx context.Context, userId uint) error {
 	query := `DELETE FROM wallets WHERE user_id = ?`
-	err := i.DB.Exec(query, userId).Error
+	err := o.DB.Exec(query, userId).Error
 	return err
 }
