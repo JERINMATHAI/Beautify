@@ -38,4 +38,5 @@ type OrderRepository interface {
 	InitializeNewWallet(userID uint) (response.Wallet, error)
 	FindUserWallet(userID uint) (response.Wallet, error)
 	GetAllPendingReturnOrder(c context.Context, page request.ReqPagination) (ReturnRequests []response.ReturnRequests, err error)
+	ClearWalletHistory(ctx context.Context, userId uint) error
 }

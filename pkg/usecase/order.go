@@ -120,6 +120,11 @@ func (o *OrderUseCase) PlaceOrder(c context.Context, order domain.Order) (respon
 	if err != nil {
 		return response.PaymentResponse{}, err
 	}
+
+	err = o.OrderRepository.ClearWalletHistory(c, order.User_Id)
+	if err != nil {
+		return response.PaymentResponse{}, err
+	}
 	return paymentresp, nil
 }
 
