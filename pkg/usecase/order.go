@@ -127,6 +127,9 @@ func (o *OrderUseCase) PlaceOrder(c context.Context, order domain.Order) (respon
 	}
 	return paymentresp, nil
 }
+func (o *OrderUseCase) ClearWalletHistory(ctx context.Context, userId uint) error {
+	return nil
+}
 
 func (o *OrderUseCase) FindPaymentMethodIdByOrderId(c context.Context, order_id uint) (uint, error) {
 	method_id, err := o.OrderRepository.FindPaymentMethodIdByOrderId(c, order_id)

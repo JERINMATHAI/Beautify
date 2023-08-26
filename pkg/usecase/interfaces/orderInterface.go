@@ -31,4 +31,5 @@ type OrderService interface {
 	CreateUserWallet(userID uint) error
 
 	GetAllPendingReturnRequest(c context.Context, page request.ReqPagination) (ReturnRequests []response.ReturnRequests, err error)
+	ClearWalletHistory(ctx context.Context, userId uint) error
 }
