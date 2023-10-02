@@ -733,6 +733,53 @@
                 }
             }
         },
+        "/cart/delete": {
+            "delete": {
+                "description": "Delete cart items of the user in the database",
+                "tags": [
+                    "User"
+                ],
+                "summary": "Delete user's cart",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Cart delete details",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.DeleteCartItemReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfuly removed item from cart",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Something went wrong!",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/cart/get": {
             "get": {
                 "description": "Retrieve cart items of the user from the database",
@@ -1662,6 +1709,17 @@
                 },
                 "valid_till": {
                     "type": "string"
+                }
+            }
+        },
+        "request.DeleteCartItemReq": {
+            "type": "object",
+            "required": [
+                "product_id"
+            ],
+            "properties": {
+                "product_id": {
+                    "type": "integer"
                 }
             }
         },

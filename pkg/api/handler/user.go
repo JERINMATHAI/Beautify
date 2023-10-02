@@ -24,16 +24,16 @@ func NewUserHandler(userUsecase interfaces.UserService) *UserHandler {
 	return &UserHandler{userService: userUsecase}
 }
 
-//	User Signup  godoc
-//	@Summary		User Signup
-//	@id				User Signup
-//	@Description	Create new user account
-//	@Tags			User
-//	@Param			input	body	request.SignupUserData	true	"inputs"
-//	@Accept			json
-//	@Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
-//	@Success		200	{object}	response.Response{}	"Successfully logged in"
-//	@Router			/signup [post]
+// User Signup  godoc
+// @Summary		User Signup
+// @id				User Signup
+// @Description	Create new user account
+// @Tags			User
+// @Param			input	body	request.SignupUserData	true	"inputs"
+// @Accept			json
+// @Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
+// @Success		200	{object}	response.Response{}	"Successfully logged in"
+// @Router			/signup [post]
 func (u *UserHandler) UserSignup(c *gin.Context) {
 	var body request.SignupUserData
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -55,18 +55,18 @@ func (u *UserHandler) UserSignup(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-//	User Login  godoc
-//	@Summary		User login
-//	@id				User login
-//	@Description	Login to user account
-//	@Tags			User
-//	@Param			input	body	request.LoginData	true	"inputs"
-//	@Accept			json
-//	@Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
-//  @Failure 		400 {object}	response.Response{} 	"Failed to login"
-//	@Failure		500	{object}	response.Response{}		"Generate JWT failure"
-//	@Success		200 {object}	response.Response{}		"OTP send to your mobile number!"
-//	@Router			/login [post]
+//		User Login  godoc
+//		@Summary		User login
+//		@id				User login
+//		@Description	Login to user account
+//		@Tags			User
+//		@Param			input	body	request.LoginData	true	"inputs"
+//		@Accept			json
+//		@Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
+//	 @Failure 		400 {object}	response.Response{} 	"Failed to login"
+//		@Failure		500	{object}	response.Response{}		"Generate JWT failure"
+//		@Success		200 {object}	response.Response{}		"OTP send to your mobile number!"
+//		@Router			/login [post]
 func (u *UserHandler) LoginSubmit(c *gin.Context) {
 	var body request.LoginData
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -99,18 +99,18 @@ func (u *UserHandler) LoginSubmit(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-//	User OTP Verification  godoc
-//	@Summary		User OTP Verification
-//	@id				User OTP Verification
-//	@Description	OTP Verification to user account
-//	@Tags			User
-//	@Param			input	body	request.OTPVerify	true	"inputs"
-//	@Accept			json
-//	@Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
-//  @Failure 		500 {object}	response.Response{} 	"User not registered"
-//	@Failure		500	{object}	response.Response{}		"Failed to login"
-//	@Success		200 {object}	response.Response{}		"Successfully logged in"
-//	@Router			/login/otp-verify [post]
+//		User OTP Verification  godoc
+//		@Summary		User OTP Verification
+//		@id				User OTP Verification
+//		@Description	OTP Verification to user account
+//		@Tags			User
+//		@Param			input	body	request.OTPVerify	true	"inputs"
+//		@Accept			json
+//		@Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
+//	 @Failure 		500 {object}	response.Response{} 	"User not registered"
+//		@Failure		500	{object}	response.Response{}		"Failed to login"
+//		@Success		200 {object}	response.Response{}		"Successfully logged in"
+//		@Router			/login/otp-verify [post]
 func (u *UserHandler) UserOTPVerify(c *gin.Context) {
 	var body request.OTPVerify
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -146,44 +146,44 @@ func (u *UserHandler) UserOTPVerify(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-//	User Home  godoc
-//	@Summary		User Home
-//	@id				User Home
-//	@Description	Home page for user
-//	@Tags			User
-//	@Accept			json
-//	@Success		200 {object}	response.Response{}		"Welcome to home !"
-//	@Router			/ [get]
+// User Home  godoc
+// @Summary		User Home
+// @id				User Home
+// @Description	Home page for user
+// @Tags			User
+// @Accept			json
+// @Success		200 {object}	response.Response{}		"Welcome to home !"
+// @Router			/ [get]
 func (u *UserHandler) Home(c *gin.Context) {
 	response := response.SuccessResponse(200, "Welcome to home !", nil)
 	c.JSON(http.StatusOK, response)
 }
 
-//	User Logout  godoc
-//	@Summary		User Logout
-//	@id				User Logout
-//	@Description	Logout from user account
-//	@Tags			User
-//	@Accept			json
-//	@Success		200 {object}	response.Response{}		"Log out successful"
-//	@Router			/logout [get]
+// User Logout  godoc
+// @Summary		User Logout
+// @id				User Logout
+// @Description	Logout from user account
+// @Tags			User
+// @Accept			json
+// @Success		200 {object}	response.Response{}		"Log out successful"
+// @Router			/logout [get]
 func (u *UserHandler) LogoutUser(c *gin.Context) {
 	c.SetCookie("user-auth", "", -1, "", "", false, true)
 	response := response.SuccessResponse(http.StatusOK, "Log out successful", nil)
 	c.JSON(http.StatusOK, response)
 }
 
-//	Add user addresss  godoc
-//	@Summary		Add user addresss
-//	@id				Add user addresss
-//	@Description	Add the addresss of user
-//	@Tags			User
-//	@Param			input	body	request.Address	true	"inputs"
-//	@Accept			json
-//	@Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
-//  @Failure 		500 {object}	response.Response{} 	"Something went wrong"
-//	@Success		200 {object}	response.Response{}		"Address saved successfully"
-//	@Router			/profile/add-address [post]
+//		Add user addresss  godoc
+//		@Summary		Add user addresss
+//		@id				Add user addresss
+//		@Description	Add the addresss of user
+//		@Tags			User
+//		@Param			input	body	request.Address	true	"inputs"
+//		@Accept			json
+//		@Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
+//	 @Failure 		500 {object}	response.Response{} 	"Something went wrong"
+//		@Success		200 {object}	response.Response{}		"Address saved successfully"
+//		@Router			/profile/add-address [post]
 func (u *UserHandler) AddAddress(c *gin.Context) {
 	var body request.Address
 	userId := utils.GetUserIdFromContext(c)
@@ -203,17 +203,17 @@ func (u *UserHandler) AddAddress(c *gin.Context) {
 
 }
 
-//	Update user addresss  godoc
-//	@Summary		update addresss
-//	@id				update user addresss
-//	@Description	update the addresss of user
-//	@Tags			User
-//	@Param			input	body	request.AddressPatchReq	true	"inputs"
-//	@Accept			json
-//	@Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
-//  @Failure 		500 {object}	response.Response{} 	"Something went wrong"
-//	@Success		200 {object}	response.Response{}		"Address updated successfully"
-//	@Router			/profile/edit-address [put]
+//		Update user addresss  godoc
+//		@Summary		update addresss
+//		@id				update user addresss
+//		@Description	update the addresss of user
+//		@Tags			User
+//		@Param			input	body	request.AddressPatchReq	true	"inputs"
+//		@Accept			json
+//		@Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
+//	 @Failure 		500 {object}	response.Response{} 	"Something went wrong"
+//		@Success		200 {object}	response.Response{}		"Address updated successfully"
+//		@Router			/profile/edit-address [put]
 func (u *UserHandler) UpdateAddress(c *gin.Context) {
 	userId := utils.GetUserIdFromContext(c)
 	var body request.AddressPatchReq
@@ -232,17 +232,17 @@ func (u *UserHandler) UpdateAddress(c *gin.Context) {
 	c.JSON(200, response)
 }
 
-//	Delete user addresss  godoc
-//	@Summary		Delete user addresss
-//	@id				Delete user addresss
-//	@Description	Delete the addresss of user
-//	@Tags			User
-//	@Param			input	body	request.Address	true	"inputs"
-//	@Accept			json
-//	@Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
-//  @Failure 		500 {object}	response.Response{} 	"Something went wrong"
-//	@Success		200 {object}	response.Response{}		"Address deleted successfully"
-//	@Router			/profile/delete-address [delete]
+//		Delete user addresss  godoc
+//		@Summary		Delete user addresss
+//		@id				Delete user addresss
+//		@Description	Delete the addresss of user
+//		@Tags			User
+//		@Param			input	body	request.Address	true	"inputs"
+//		@Accept			json
+//		@Failure		400	{object}	response.Response{}		"Missing or Invalid entry"
+//	 @Failure 		500 {object}	response.Response{} 	"Something went wrong"
+//		@Success		200 {object}	response.Response{}		"Address deleted successfully"
+//		@Router			/profile/delete-address [delete]
 func (u *UserHandler) DeleteAddress(c *gin.Context) {
 	userId := utils.GetUserIdFromContext(c)
 	addressId, err := utils.StringToUint(c.Param("id"))
@@ -260,17 +260,17 @@ func (u *UserHandler) DeleteAddress(c *gin.Context) {
 	c.JSON(200, response)
 }
 
-//	Get all user addresss  godoc
-//	@Summary		Get all user addresss
-//	@id				Get all user addresss
-//	@Description	Get all the addresss of user
-//	@Tags			User
-//	@Param			input	body	request.Address	true	"inputs"
-//	@Accept			json
-//	@Failure		500	{object}	response.Response{}		"User not detected"
-//  @Failure 		500 {object}	response.Response{} 	"Something went wrong"
-//	@Success		200 {object}	response.Response{}		"Get all addresses successfully"
-//	@Router			/profile/getaddress [post]
+//		Get all user addresss  godoc
+//		@Summary		Get all user addresss
+//		@id				Get all user addresss
+//		@Description	Get all the addresss of user
+//		@Tags			User
+//		@Param			input	body	request.Address	true	"inputs"
+//		@Accept			json
+//		@Failure		500	{object}	response.Response{}		"User not detected"
+//	 @Failure 		500 {object}	response.Response{} 	"Something went wrong"
+//		@Success		200 {object}	response.Response{}		"Get all addresses successfully"
+//		@Router			/profile/getaddress [post]
 func (u *UserHandler) GetAllAddress(c *gin.Context) {
 	userId := utils.GetUserIdFromContext(c)
 	if userId == 0 {
@@ -419,6 +419,16 @@ func (u *UserHandler) UpdateCart(c *gin.Context) {
 
 }
 
+// DeleteCart godoc
+// @Summary Delete user's cart
+// @Description Delete cart items of the user in the database
+// @Tags User
+// @Param Authorization header string true "token"
+// @Param input body request.DeleteCartItemReq true "Cart delete details"
+// @Success 200 {object} response.Response{} "Successfuly removed item from cart"
+// @Failure 400 {object} response.Response{} "invalid input"
+// @Failure 500 {object} response.Response{} "Something went wrong!"
+// @Router /cart/delete [delete]
 func (u *UserHandler) DeleteCartItem(c *gin.Context) {
 	var body request.DeleteCartItemReq
 	if err := c.ShouldBindJSON(&body); err != nil {
