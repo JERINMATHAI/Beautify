@@ -16,7 +16,7 @@ build: ${BINARY_DIR} ## Compile the code, build Executable File
 	$(GOCMD) build -o $(BINARY_DIR) -v ./cmd/api
 
 run: ## Start application
-	$(GOCMD) build ./cmd/api/ && $(GOCMD) run ./cmd/api
+	$(GOCMD) run cmd/api/main.go
 
 test: ## Run tests
 	$(GOCMD) test ./... -cover
@@ -42,3 +42,9 @@ swag: ## Generate swagger docs
 
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+mockgen:
+	mockgen -source=pkg/repository/interfaces/userInterface.go -destination=pkg/mock/userRepoMock/userRepoMock.go -package=mock
+	
+usecasemockgen:
+	mockgen -source=pkg/usecase/interfaces/userInterface.go -destination=pkg/mock/userUsecaseMock/userUsecaseMock.go -package=mock
