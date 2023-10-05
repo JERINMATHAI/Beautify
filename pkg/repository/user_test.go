@@ -48,3 +48,39 @@ func TestFindUser(t *testing.T) {
 	fmt.Println(result)
 
 }
+
+func TestSaveUser(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Errorf("SQL mock failed %v ", err)
+	}
+	defer db.Close()
+	gormDb, err := gorm.Open(postgres.New(postgres.Config{
+		Conn: db,
+	}), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("failed to create psql instance ")
+	}
+	err = gormDb.Statement.Error
+	if err != nil {
+		t.Fatalf("Failed to ping the database: %v", err)
+	}
+	user := domain.Users{
+		ID:        2,
+		UserName:  "JerinMathai",
+		FirstName: "Jerin",
+		LastName:  "Mathai",
+		Age:       25,
+		Email:     "jerin@gmail.com",
+	}
+	expectedError := errors.New("Failed to save user")
+	authDb := &userDatabase{DB: gormDb}
+	mock.ExpectQuery(
+		`INSERT INTO users (user_name, first_name, last_name, age, email, phone, password,created_at)
+		  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`).
+		WithArgs(user.ID, user.Email, user.Phone, user.UserName).
+		WillReturnRows(sqlmock.NewRows([]string{"ID", "UserName", "FirstName", "LastName", "Age", "Email"}))
+	result, resultErr := authDb.SaveUser(context.Background(), user)
+	assert.Equal(t, expectedError, resultErr)
+	fmt.Println(result)
+}
